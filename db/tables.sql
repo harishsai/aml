@@ -52,6 +52,15 @@ CREATE TABLE onboarding_details (
     country VARCHAR(100),
     zip_code VARCHAR(20),
     phone_number VARCHAR(50),
+    lei_identifier VARCHAR(100), -- Legal Entity Identifier
+    entity_type VARCHAR(50),      -- Bank, Broker-Dealer, Fund, etc.
+    bod_list_content BYTEA,      -- Binary storage for Board of Directors PDF
+    financials_content BYTEA,    -- Binary storage for Audited Balance Sheet PDF
+    ownership_content BYTEA,     -- Binary storage for Ownership structure PDF
+    business_activity VARCHAR(100),
+    source_of_funds VARCHAR(100),
+    expected_volume VARCHAR(100),
+    countries_operation TEXT,
     business_need TEXT,
     -- Step 2: AML Questionnaire Data stored as JSONB for flexibility
     aml_questions JSONB,

@@ -257,19 +257,67 @@
             box-shadow: 0 15px 30px rgba(0, 255, 163, 0.2);
         }
 
-        .back-link {
-            text-align: center;
-            margin-top: 25px;
-        }
-
-        .back-link a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.85rem;
-            transition: color 0.3s;
-        }
-
         .back-link a:hover {
+            color: var(--primary);
+        }
+
+        /* File Upload Styling */
+        .file-upload-group {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .file-upload-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .file-field {
+            margin-bottom: 15px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--input-bg);
+            border: 1px dashed var(--border);
+            padding: 12px 15px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .file-input-wrapper:hover {
+            border-color: var(--primary);
+            background: rgba(27, 94, 32, 0.02);
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-label-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-icon {
+            font-size: 1.2rem;
             color: var(--primary);
         }
     </style>
@@ -351,6 +399,55 @@
                 </div>
 
                 <div class="field">
+                    <input type="text" id="lei" placeholder=" " required>
+                    <label for="lei">Legal Entity Identifier (LEI)</label>
+                </div>
+
+                <div class="field">
+                    <select id="entity-type" required>
+                        <option value="" disabled selected hidden></option>
+                        <option value="bank">Bank</option>
+                        <option value="broker-dealer">Broker-Dealer</option>
+                        <option value="fund">Fund</option>
+                        <option value="corporate">Corporate</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <label for="entity-type">Entity Type</label>
+                </div>
+
+                <div class="file-upload-group">
+                    <span class="file-upload-title">Compliance Documentation</span>
+
+                    <div class="file-field">
+                        <div class="file-input-wrapper">
+                            <span class="file-icon">📄</span>
+                            <span class="file-label-text" id="label-bod">Board of Directors List</span>
+                            <input type="file" id="file-bod" accept=".pdf,.doc,.docx" required
+                                onchange="updateFileLabel(this, 'label-bod')">
+                        </div>
+                    </div>
+
+                    <div class="file-field">
+                        <div class="file-input-wrapper">
+                            <span class="file-icon">📊</span>
+                            <span class="file-label-text" id="label-financials">Financials (Audited Balance
+                                Sheet)</span>
+                            <input type="file" id="file-financials" accept=".pdf,.jpg,.png" required
+                                onchange="updateFileLabel(this, 'label-financials')">
+                        </div>
+                    </div>
+
+                    <div class="file-field">
+                        <div class="file-input-wrapper">
+                            <span class="file-icon">🏢</span>
+                            <span class="file-label-text" id="label-ownership">Ownership Structure</span>
+                            <input type="file" id="file-ownership" accept=".pdf,.jpg,.png" required
+                                onchange="updateFileLabel(this, 'label-ownership')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field" style="margin-top: 24px;">
                     <select id="product" required>
                         <option value="" disabled selected hidden></option>
                         <option value="payments">Global Payments</option>
@@ -372,17 +469,6 @@
                 <p class="step-sub">Standard due diligence for institutional access.</p>
 
                 <div class="field">
-                    <select id="entity-type" required>
-                        <option value="" disabled selected hidden></option>
-                        <option>Bank</option>
-                        <option>Broker-Dealer</option>
-                        <option>Fund</option>
-                        <option>Corporate</option>
-                    </select>
-                    <label for="entity-type">Entity Type</label>
-                </div>
-
-                <div class="field">
                     <input type="text" id="reg-num" placeholder=" " required>
                     <label for="reg-num">Registration Number</label>
                 </div>
@@ -393,8 +479,52 @@
                         <option>Publicly Traded</option>
                         <option>Privately Held</option>
                         <option>Government Owned</option>
+                        <option>Subsidiary</option>
                     </select>
                     <label for="ownership-type">Ownership Type</label>
+                </div>
+
+                <div class="field">
+                    <select id="business-activity" required>
+                        <option value="" disabled selected hidden></option>
+                        <option>Investment Banking</option>
+                        <option>Asset Management</option>
+                        <option>Retail Banking</option>
+                        <option>Fintech / Payments</option>
+                        <option>Energy / Commodities</option>
+                        <option>Real Estate</option>
+                        <option>Other</option>
+                    </select>
+                    <label for="business-activity">Primary Business Activity</label>
+                </div>
+
+                <div class="field">
+                    <select id="source-of-funds" required>
+                        <option value="" disabled selected hidden></option>
+                        <option>Operating Revenues</option>
+                        <option>Shareholder Capital</option>
+                        <option>Investment Returns</option>
+                        <option>Loan / Credit Facility</option>
+                        <option>Other</option>
+                    </select>
+                    <label for="source-of-funds">Source of Funds</label>
+                </div>
+
+                <div class="field">
+                    <select id="expected-volume" required>
+                        <option value="" disabled selected hidden></option>
+                        <option>
+                            < $1M</option>
+                        <option>$1M - $10M</option>
+                        <option>$10M - $100M</option>
+                        <option>$100M+</option>
+                    </select>
+                    <label for="expected-volume">Expected Monthly Volume (USD)</label>
+                </div>
+
+                <div class="field">
+                    <input type="text" id="countries-op" placeholder=" " required>
+                    <label for="countries-op">Main Countries of Operation</label>
                 </div>
 
                 <div class="question-group">
@@ -428,6 +558,23 @@
     </div>
 
     <script>
+        function updateFileLabel(input, labelId) {
+            const label = document.getElementById(labelId);
+            if (input.files && input.files[0]) {
+                label.innerText = input.files[0].name;
+                label.style.color = 'var(--primary)';
+                label.style.fontWeight = '600';
+            } else {
+                label.innerText = label.getAttribute('data-original') || 'Select File';
+                label.style.color = 'var(--text-muted)';
+            }
+        }
+
+        // Initialize original labels
+        document.querySelectorAll('.file-label-text').forEach(label => {
+            label.setAttribute('data-original', label.innerText);
+        });
+
         // Form Logic
         function goToStep(step) {
             const s1 = document.getElementById('step-1');

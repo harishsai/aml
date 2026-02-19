@@ -306,48 +306,57 @@ em {
 .pain-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 40px;
+    gap: 30px;
 }
 
 .pain-card {
-    background: var(--surface);
-    padding: 60px 40px;
-    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 50px 40px;
+    border: 1px solid rgba(0, 255, 163, 0.3);
+    border-radius: 20px;
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
-    min-height: 400px;
+    min-height: 280px;
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
+    backdrop-filter: blur(10px);
 }
 
 .pain-card:hover {
     border-color: var(--accent);
-    transform: translateY(-12px);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    transform: translateY(-10px);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
 }
 
 .pain-num {
     display: block;
     font-family: var(--font-heading);
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     color: var(--accent);
-    margin-bottom: 35px;
+    margin-bottom: 25px;
     font-weight: 700;
-}
-
-.pain-card h3 {
-    font-size: 2.2rem;
-    margin-bottom: 20px;
-    line-height: 1.1;
-    font-weight: 700;
+    opacity: 0.8;
 }
 
 .pain-card p {
-    color: var(--text-muted);
-    font-size: 1.1rem;
-    line-height: 1.7;
-    flex-grow: 1;
+    color: var(--text);
+    font-size: 1.15rem;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+@media (max-width: 1024px) {
+    .pain-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .pain-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Demo Section */

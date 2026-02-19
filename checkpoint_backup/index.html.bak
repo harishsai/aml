@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinetix | Premium Onboarding Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+        rel="stylesheet">
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+
+<body>
+    <div class="noise-overlay"></div>
+    <div class="mesh-container">
+        <div class="mesh-ball ball-1"></div>
+        <div class="mesh-ball ball-2"></div>
+        <div class="mesh-ball ball-3"></div>
+    </div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline">
+        <span class="cursor-arrow">→</span>
+    </div>
+
+    <nav class="nav">
+        <div class="nav-logo">KINETIX</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link" onclick="openLogin()">LOGIN</a>
+            <a href="signup.html" class="nav-link btn-secondary">SIGNUP</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h2 class="hero-pre">Financial Innovation</h2>
+                <h1 class="hero-title liquid-text">Onboarding, <br><em>Reimagined.</em></h1>
+                <p class="hero-subtitle">Solving the multi-billion dollar friction in enterprise compliance and risk
+                    management.</p>
+                <div class="hero-cta">
+                    <a href="#demo" class="btn-primary">Explore the Future</a>
+                    <span class="scroll-down">Scroll to discover</span>
+                </div>
+            </div>
+            <div class="hero-bg"></div>
+        </section>
+
+        <!-- Pain Points Section -->
+        <section id="problems" class="problems">
+            <div class="container">
+                <h2 class="section-title liquid-text">The Industry Bottleneck</h2>
+                <div class="pain-grid">
+                    <div class="pain-card">
+                        <span class="pain-num">01</span>
+                        <p>Manual document collection and validation</p>
+                    </div>
+                    <div class="pain-card">
+                        <span class="pain-num">02</span>
+                        <p>Complex regulatory compliance (KYC, AML, tax) processes.</p>
+                    </div>
+                    <div class="pain-card">
+                        <span class="pain-num">03</span>
+                        <p>High level of effort involved in the initial onboarding milestones.</p>
+                    </div>
+                    <div class="pain-card">
+                        <span class="pain-num">04</span>
+                        <p>Limited realtime visibility into onboarding progress.</p>
+                    </div>
+                    <div class="pain-card">
+                        <span class="pain-num">05</span>
+                        <p>High human dependency and scalability limits</p>
+                    </div>
+                    <div class="pain-card">
+                        <span class="pain-num">06</span>
+                        <p>Siloed systems and multiple platforms involved (Salesforce, BPM etc)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+        </footer>
+    </main>
+
+    <!-- Authenticated Hub (Hidden by default) -->
+    <section id="hub" class="hub-section" style="display: none;">
+        <div class="container relative">
+            <div class="hub-header">
+                <h2 class="section-title liquid-text">Kinetix Hub</h2>
+                <p id="hub-welcome">Welcome back to your strategic dashboard.</p>
+            </div>
+
+            <!-- Case Header (Restored) -->
+            <div class="case-header glass">
+                <div class="case-info">
+                    <div class="case-id">CASE-ID: <span id="display-case-id">NEX-7829-X</span></div>
+                    <div class="client-name-header" id="display-client-name">Awaiting Registration...</div>
+                </div>
+            </div>
+
+            <div class="onboarding-card glass">
+                <div class="scanner-line"></div>
+
+                <!-- Participant View (RFI Form Restored inside Hub) -->
+                <div class="persona-content client-view" id="view-participant">
+                    <div class="step-header">
+                        <h3>Onboarding & Discovery</h3>
+                    </div>
+                    <p class="step-desc">Review and manage your partnership details with Kinetix.</p>
+
+                    <div class="status-box-simple glass">
+                        <span class="label">Current Status:</span>
+                        <span class="value tag blue">PENDING SUBMISSION</span>
+                    </div>
+
+                    <div class="form-footer-actions" style="margin-top: 30px;">
+                        <button class="btn-primary">View Full Application</button>
+                    </div>
+                </div>
+
+                <!-- Admin View (Restored) -->
+                <div class="persona-content admin-view" id="view-admin" style="display: none;">
+                    <div class="step-header">
+                        <h3>Internal Ops Review</h3>
+                        <div class="task-badge">Task ID: VET-992</div>
+                    </div>
+
+                    <div class="review-panel glass">
+                        <div class="info-row">
+                            <span class="label">Priority:</span>
+                            <span class="value tag red">HIGH</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Auto-Match:</span>
+                            <span class="value tag green">NO SANCTION HITS</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-actions">
+                        <button class="btn-approve" onclick="alert('Case Approved')">Approve Case</button>
+                        <button class="btn-reject">Request Info</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hub-footer">
+                <button class="btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Chat Widget -->
+    <div class="chat-widget">
+        <div class="chat-window glass" id="chat-window">
+            <div class="chat-header">
+                <div class="ai-pulse"></div>
+                <span>Kyra Assistant</span>
+                <button class="chat-close" onclick="toggleChat()">×</button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message ai">
+                    <p>Hello! I'm Kyra, your Strategic Onboarding assistant. How can I help you today?</p>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Type a message..." onkeypress="handleChatKey(event)">
+                <button onclick="sendChatMessage()">Send</button>
+            </div>
+        </div>
+        <button class="chat-toggle btn-primary" onclick="toggleChat()">
+            <span class="chat-icon">💬</span>
+        </button>
+    </div>
+
+
+
+    <!-- Login Modal -->
+    <div class="signup-modal" id="login-modal">
+        <div class="signup-content glass animate-up" style="max-width: 700px;">
+            <button class="modal-close" onclick="closeLogin()">×</button>
+            <h2 class="liquid-text">Sign In to Kinetix</h2>
+            <p class="signup-sub">Select your persona to access the platform.</p>
+
+            <div class="login-options">
+                <div class="login-card" onclick="loginAs('participant')">
+                    <div class="login-icon">👤</div>
+                    <h3>Participant</h3>
+                    <p>Access your onboarding application and status.</p>
+                </div>
+                <div class="login-card" onclick="loginAs('admin')">
+                    <div class="login-icon">🛡️</div>
+                    <h3>Admin / Ops</h3>
+                    <p>Review internal cases and manage approvals.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>

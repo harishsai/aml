@@ -1,5 +1,17 @@
-// Custom Cursor removed for corporate theme
-/* removed logic */
+// Custom Cursor Interaction
+const dot = document.querySelector('.cursor-dot');
+const outline = document.querySelector('.cursor-outline');
+
+window.addEventListener('mousemove', (e) => {
+    // Show cursor on first movement
+    if (dot.style.opacity !== '1') {
+        dot.style.opacity = '1';
+        outline.style.opacity = '1';
+    }
+
+    gsap.to(dot, { x: e.clientX, y: e.clientY, xPercent: -50, yPercent: -50, duration: 0 });
+    gsap.to(outline, { x: e.clientX, y: e.clientY, xPercent: -50, yPercent: -50, duration: 0.15 });
+});
 
 // Navigation Hide/Show on Scroll
 let lastScroll = 0;
@@ -194,9 +206,33 @@ function addAgentLog(container, text) {
     container.scrollTop = container.scrollHeight;
 }
 
-/* Cursor hover effects removed for corporate theme */
+// Hover effects for magnetic elements
+document.querySelectorAll('.btn-primary, .nav-link, .roadmap-step, label, .pain-card').forEach(link => {
+    link.addEventListener('mouseenter', () => {
+        outline.classList.add('arrow-active');
+    });
+    link.addEventListener('mouseleave', () => {
+        outline.classList.remove('arrow-active');
+    });
+});
 
-/* Magnetic UI removed for corporate theme */
+// Magnetic effect for labels (subtle)
+document.querySelectorAll('label').forEach(label => {
+    label.addEventListener('mousemove', (e) => {
+        const rect = label.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        gsap.to(label, {
+            x: x * 0.3,
+            y: y * 0.3,
+            duration: 0.3,
+            ease: "power2.out"
+        });
+    });
+    label.addEventListener('mouseleave', () => {
+        gsap.to(label, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+    });
+});
 
 // Check for signup/login flags
 window.addEventListener('load', () => {
@@ -213,10 +249,12 @@ window.addEventListener('load', () => {
 // Persona Management
 function openLogin() {
     document.getElementById('login-modal').classList.add('active');
+    dot.style.transform = 'scale(1.5)';
 }
 
 function closeLogin() {
     document.getElementById('login-modal').classList.remove('active');
+    dot.style.transform = 'scale(1)';
 }
 
 function loginAs(role) {

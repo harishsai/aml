@@ -819,8 +819,129 @@ em {
     box-shadow: 0 0 20px var(--accent);
     z-index: 10;
     opacity: 0;
-    pointer-events: none;
 }
+
+/* Request For Information Form Styling */
+.required {
+    color: #ff3c3c;
+    margin-left: 2px;
+}
+
+.required-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 15px;
+}
+
+textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 15px;
+    color: var(--text);
+    font-family: var(--font-main);
+    resize: vertical;
+    transition: border-color 0.3s;
+}
+
+textarea:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.form-footer-v2 {
+    display: flex;
+    gap: 15px;
+}
+
+.btn-submit {
+    background: #007bff;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-submit:hover {
+    background: #0056b3;
+}
+
+.btn-reset {
+    background: white;
+    color: #333;
+    padding: 12px 30px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-reset:hover {
+    background: #f8f9fa;
+}
+
+/* Kinetix Final Polish Elements */
+.logo-accent {
+    color: var(--accent);
+}
+
+.status-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-tag.pending {
+    background: rgba(255, 166, 0, 0.1);
+    color: #ffa600;
+}
+
+.status-tag.verified {
+    background: rgba(0, 255, 163, 0.1);
+    color: var(--accent);
+}
+
+/* Persona Switching Overlay */
+.persona-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.persona-overlay.active {
+    animation: personaFade 0.6s ease-in-out;
+}
+
+@keyframes personaFade {
+    0% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
 
 @keyframes scanLineAnim {
     0% {
@@ -1151,6 +1272,102 @@ em {
     border-top: 1px solid var(--border);
     color: var(--text-muted);
     font-size: 0.8rem;
+}
+
+/* Login Page Styles */
+.login-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    background: radial-gradient(circle at top right, rgba(0, 255, 163, 0.05), transparent 40%),
+        radial-gradient(circle at bottom left, rgba(0, 123, 255, 0.05), transparent 40%);
+}
+
+.container-center {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.login-form-card {
+    max-width: 450px;
+    width: 100%;
+    padding: 50px;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    text-align: center;
+}
+
+.form-header {
+    margin-bottom: 40px;
+}
+
+.form-header .nav-logo {
+    margin-bottom: 20px;
+    font-size: 2rem;
+}
+
+.form-header h2 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    color: var(--text);
+}
+
+.form-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.btn-full {
+    width: 100%;
+    justify-content: center;
+}
+
+.login-footer {
+    margin-top: 30px;
+    font-size: 0.85rem;
+}
+
+.login-footer a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.login-footer a:hover {
+    color: var(--accent);
+}
+
+/* Hub Section Styling */
+.hub-section {
+    padding: 100px 0;
+    min-height: 100vh;
+}
+
+.hub-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.status-box-simple {
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.hub-footer {
+    margin-top: 50px;
+    text-align: center;
+    padding-top: 30px;
+    border-top: 1px solid var(--border);
+}
+
+.relative {
+    position: relative;
 }
 
 /* Responsive */

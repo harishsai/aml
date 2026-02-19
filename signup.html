@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Started | Kinetix</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --form-bg: rgba(255, 255, 255, 0.02);
+            --form-border: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.2);
+        }
+
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #020202;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+            font-family: 'Inter', sans-serif;
+            padding: 60px 20px;
+        }
+
+        .auth-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            filter: blur(120px);
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .ball-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+            top: -10%;
+            left: -10%;
+        }
+
+        .ball-2 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+            bottom: -20%;
+            right: -10%;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 600px;
+            padding: 50px;
+            background: var(--form-bg);
+            border: 1px solid var(--form-border);
+            backdrop-filter: blur(40px);
+            border-radius: 32px;
+            z-index: 10;
+            position: relative;
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.8);
+        }
+
+        .brand-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            letter-spacing: 4px;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Progress Indicator */
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: var(--border);
+            z-index: 1;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            z-index: 2;
+            transition: all 0.4s;
+            position: relative;
+        }
+
+        .progress-dot.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        .progress-dot.completed {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .step-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .step-sub {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            margin-bottom: 35px;
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        /* Form Fields */
+        .field {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .field label {
+            position: absolute;
+            left: 20px;
+            top: 18px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            padding: 26px 20px 10px;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(0, 255, 163, 0.03);
+        }
+
+        .field input:focus+label,
+        .field input:not(:placeholder-shown)+label,
+        .field select:focus+label,
+        .field select:not([value=""])+label {
+            top: 8px;
+            left: 20px;
+            font-size: 0.7rem;
+            color: var(--accent);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .field select option {
+            background-color: #111;
+            color: #fff;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Questionnaire Styles */
+        .question-group {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .question-label {
+            display: block;
+            font-size: 0.9rem;
+            color: #fff;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .radio-options {
+            display: flex;
+            gap: 20px;
+        }
+
+        .radio-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+        }
+
+        .radio-btn input {
+            width: auto;
+            padding: 0;
+            accent-color: var(--accent);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        .btn-auth {
+            flex: 1;
+            padding: 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s;
+            border: none;
+            letter-spacing: 1px;
+        }
+
+        .btn-next {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 255, 163, 0.2);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .back-link a {
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s;
+        }
+
+        .back-link a:hover {
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body class="auth-page">
+    <div class="auth-bg">
+        <div class="ball-1"></div>
+        <div class="ball-2"></div>
+    </div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline">
+        <span class="cursor-arrow">→</span>
+    </div>
+
+    <div class="auth-card" id="signup-card">
+        <div class="brand-logo">KINETIX</div>
+
+        <div class="progress-bar">
+            <div class="progress-dot active" data-step="1"></div>
+            <div class="progress-dot" data-step="2"></div>
+        </div>
+
+        <form id="signup-form">
+            <!-- STEP 1: CONTACT & COMPANY -->
+            <div class="form-step active" id="step-1">
+                <h2 class="step-title">Initial Phase</h2>
+                <p class="step-sub">Introduce your entity to the Kinetix ecosystem.</p>
+
+                <div class="input-row">
+                    <div class="field">
+                        <input type="text" id="fname" placeholder=" " required>
+                        <label for="fname">First Name</label>
+                    </div>
+                    <div class="field">
+                        <input type="text" id="lname" placeholder=" " required>
+                        <label for="lname">Last Name</label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <input type="text" id="company" placeholder=" " required>
+                    <label for="company">Company Name</label>
+                </div>
+
+                <div class="field">
+                    <textarea id="address" placeholder=" " required rows="2"
+                        style="padding-top: 30px; min-height: 80px;"></textarea>
+                    <label for="address">Company Registered Address</label>
+                </div>
+
+                <div class="input-row">
+                    <div class="field">
+                        <select id="country" required onchange="updateStates()">
+                            <option value="" disabled selected hidden></option>
+                            <option value="US">United States</option>
+                            <option value="UK">United Kingdom</option>
+                            <option value="IN">India</option>
+                            <option value="SG">Singapore</option>
+                            <option value="AE">United Arab Emirates</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <label for="country">Country</label>
+                    </div>
+                    <div class="field">
+                        <input type="text" id="state" list="state-list" required disabled placeholder=" ">
+                        <label for="state">State / Province</label>
+                        <datalist id="state-list"></datalist>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="field">
+                        <input type="text" id="city" list="city-list" placeholder=" " required>
+                        <label for="city">City</label>
+                        <datalist id="city-list"></datalist>
+                    </div>
+                    <div class="field">
+                        <input type="text" id="zip" placeholder=" " required>
+                        <label for="zip">Zip / Postal Code</label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <input type="tel" id="phone" placeholder=" " required pattern="^\+[1-9]\d{1,14}$"
+                        title="Please enter a valid international phone number starting with + (e.g. +123456789)">
+                    <label for="phone">Phone Number (with Country Code)</label>
+                </div>
+
+                <div class="field">
+                    <select id="product" required>
+                        <option value="" disabled selected hidden></option>
+                        <option value="payments">Global Payments</option>
+                        <option value="fx">FX Solutions</option>
+                        <option value="compliance">Compliance API</option>
+                    </select>
+                    <label for="product">Product Interest</label>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-auth btn-reset" onclick="resetForm()">RESET</button>
+                    <button type="button" class="btn-auth btn-next" onclick="goToStep(2)">NEXT STEP</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: AML QUESTIONNAIRE -->
+            <div class="form-step" id="step-2">
+                <h2 class="step-title">AML Assessment</h2>
+                <p class="step-sub">Standard due diligence for institutional access.</p>
+
+                <div class="field">
+                    <select id="entity-type" required>
+                        <option value="" disabled selected hidden></option>
+                        <option>Bank</option>
+                        <option>Broker-Dealer</option>
+                        <option>Fund</option>
+                        <option>Corporate</option>
+                    </select>
+                    <label for="entity-type">Entity Type</label>
+                </div>
+
+                <div class="field">
+                    <input type="text" id="reg-num" placeholder=" " required>
+                    <label for="reg-num">Registration Number</label>
+                </div>
+
+                <div class="field">
+                    <select id="ownership-type" required>
+                        <option value="" disabled selected hidden></option>
+                        <option>Publicly Traded</option>
+                        <option>Privately Held</option>
+                        <option>Government Owned</option>
+                    </select>
+                    <label for="ownership-type">Ownership Type</label>
+                </div>
+
+                <div class="question-group">
+                    <span class="question-label">Any Sanctions or PEP exposure? *</span>
+                    <div class="radio-options">
+                        <label class="radio-btn"><input type="radio" name="sanctions" value="no" required checked>
+                            No</label>
+                        <label class="radio-btn"><input type="radio" name="sanctions" value="yes" required> Yes</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <span class="question-label">Confirm established AML Program? *</span>
+                    <div class="radio-options">
+                        <label class="radio-btn"><input type="radio" name="aml" value="yes" required checked>
+                            Yes</label>
+                        <label class="radio-btn"><input type="radio" name="aml" value="no" required> No</label>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-auth btn-reset" onclick="goToStep(1)">BACK</button>
+                    <button type="submit" class="btn-auth btn-next">SUBMIT REQUEST</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="back-link">
+            <a href="index.html">← Return to Main Application</a>
+        </div>
+    </div>
+
+    <script>
+        // Custom Cursor
+        const dot = document.querySelector('.cursor-dot');
+        const outline = document.querySelector('.cursor-outline');
+        window.addEventListener('mousemove', (e) => {
+            if (dot.style.opacity !== '1') { dot.style.opacity = '1'; outline.style.opacity = '1'; }
+            gsap.to(dot, { x: e.clientX, y: e.clientY, xPercent: -50, yPercent: -50, duration: 0 });
+            gsap.to(outline, { x: e.clientX, y: e.clientY, xPercent: -50, yPercent: -50, duration: 0.15 });
+        });
+        document.querySelectorAll('button, a, input, select').forEach(el => {
+            el.addEventListener('mouseenter', () => outline.classList.add('arrow-active'));
+            el.addEventListener('mouseleave', () => outline.classList.remove('arrow-active'));
+        });
+
+        // Form Logic
+        function goToStep(step) {
+            const s1 = document.getElementById('step-1');
+            const s2 = document.getElementById('step-2');
+            const dots = document.querySelectorAll('.progress-dot');
+
+            if (step === 2) {
+                // Validate Step 1 - Strictly Top-Down
+                const step1El = document.getElementById('step-1');
+                const inputs = step1El.querySelectorAll('input, select, textarea');
+                let firstInvalid = null;
+
+                for (const input of inputs) {
+                    if (!input.checkValidity()) {
+                        firstInvalid = input;
+                        break;
+                    }
+                }
+
+                if (firstInvalid) {
+                    firstInvalid.reportValidity();
+                    return;
+                }
+
+                gsap.to(s1, {
+                    opacity: 0, x: -20, duration: 0.4, onComplete: () => {
+                        s1.classList.remove('active');
+                        s2.classList.add('active');
+                        gsap.fromTo(s2, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.4 });
+                        dots[1].classList.add('active');
+                    }
+                });
+            } else {
+                gsap.to(s2, {
+                    opacity: 0, x: 20, duration: 0.4, onComplete: () => {
+                        s2.classList.remove('active');
+                        s1.classList.add('active');
+                        gsap.fromTo(s1, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4 });
+                        dots[1].classList.remove('active');
+                    }
+                });
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('signup-form').reset();
+        }
+
+        // Address Logic
+        const statesData = {
+            "US": [
+                "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
+                "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+                "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+                "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
+                "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+            ],
+            "IN": [
+                "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
+                "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+                "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
+            ],
+            "UK": ["England", "Scotland", "Wales", "Northern Ireland"],
+            "SG": ["Central", "North", "South"],
+            "AE": ["Dubai", "Abu Dhabi", "Sharjah"],
+            "Other": []
+        };
+
+        const citySuggestions = {
+            "US": ["New York City", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose"],
+            "IN": ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", "Kolkata", "Surat", "Pune", "Jaipur"],
+            "UK": ["London", "Birmingham", "Manchester", "Glasgow", "Liverpool", "Leeds", "Sheffield", "Edinburgh", "Bristol", "Leicester"]
+        };
+
+        function updateStates() {
+            const country = document.getElementById('country').value;
+            const stateInput = document.getElementById('state');
+            const stateList = document.getElementById('state-list');
+            const cityList = document.getElementById('city-list');
+
+            stateList.innerHTML = '';
+            cityList.innerHTML = '';
+            stateInput.value = '';
+
+            if (statesData[country]) {
+                statesData[country].forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s;
+                    stateList.appendChild(opt);
+                });
+                stateInput.disabled = false;
+            } else {
+                stateInput.disabled = true;
+            }
+
+            if (citySuggestions[country]) {
+                citySuggestions[country].forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    cityList.appendChild(opt);
+                });
+            }
+        }
+
+        document.getElementById('signup-form').onsubmit = (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerText = "PROCESSING...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                window.location.href = 'index.html?signup=success';
+            }, 1500);
+        };
+
+        // Entrance animation
+        gsap.from('#signup-card', { opacity: 0, y: 50, duration: 1, ease: "expo.out" });
+    </script>
+</body>
+
+</html>

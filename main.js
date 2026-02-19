@@ -17,22 +17,31 @@ window.addEventListener('mousemove', (e) => {
 let lastScroll = 0;
 const nav = document.querySelector('.nav');
 
+// Global Application State
+let appState = {
+    persona: 'client',
+    currentStage: 1,
+    status: 'DRAFT',
+    clientData: {
+        name: '',
+        country: '',
+        email: ''
+    }
+};
+
 window.addEventListener('scroll', () => {
     const currentScroll = window.pageYOffset;
+    const nav = document.querySelector('.nav');
 
-    // Glass background on scroll
     if (currentScroll > 50) {
         nav.classList.add('nav-scrolled');
     } else {
         nav.classList.remove('nav-scrolled');
     }
 
-    // Hide/Show logic
     if (currentScroll > lastScroll && currentScroll > 100) {
-        // Scrolling down
         nav.classList.add('nav-hidden');
     } else {
-        // Scrolling up
         nav.classList.remove('nav-hidden');
     }
 
@@ -225,43 +234,67 @@ document.querySelectorAll('label').forEach(label => {
     });
 });
 
-// Signup Modal Logic
-function openSignup() {
-    document.getElementById('signup-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
+// Check for signup/login flags
+window.addEventListener('load', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('signup') === 'success') {
+        alert("Registration Request Received! Our Onboarding team will review your AML questionnaire shortly.");
+    }
+    if (params.get('login') === 'success') {
+        const role = params.get('role') || 'participant';
+        completeLogin(role);
+    }
+});
+
+// Persona Management
+function openLogin() {
+    document.getElementById('login-modal').classList.add('active');
+    dot.style.transform = 'scale(1.5)';
 }
 
-function closeSignup() {
-    document.getElementById('signup-modal').classList.remove('active');
-    document.body.style.overflow = 'auto';
+function closeLogin() {
+    document.getElementById('login-modal').classList.remove('active');
+    dot.style.transform = 'scale(1)';
 }
 
-function submitSignup() {
-    const btn = document.querySelector('.signup-form .btn-primary');
-    const originalText = btn.innerText;
+function loginAs(role) {
+    // Redirect to standalone login page
+    window.location.href = `login.html?role=${role}`;
+}
 
-    btn.innerText = "INITIALIZING ENTITY SCAN...";
-    btn.style.opacity = "0.7";
-    btn.disabled = true;
+// Check for successful login on load
+window.addEventListener('load', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('login') === 'success') {
+        const role = params.get('role') || 'participant';
+        completeLogin(role);
+    }
+});
 
-    setTimeout(() => {
-        btn.innerText = "REGISTRATION SUCCESSFUL";
-        btn.style.background = "#00ffa3";
-        btn.style.color = "#000";
+function completeLogin(role) {
+    appState.persona = role;
 
-        setTimeout(() => {
-            closeSignup();
-            // Reset button
-            btn.innerText = originalText;
-            btn.style.background = "var(--accent)";
-            btn.disabled = false;
-            btn.style.opacity = "1";
+    const landing = document.querySelectorAll('.hero, .problems, .footer');
+    const hub = document.getElementById('hub');
 
-            // Jump to first step of demo
-            window.location.hash = "#demo";
-            jumpToStep(1);
-        }, 1500);
-    }, 2000);
+    landing.forEach(el => el.style.display = 'none');
+    hub.style.display = 'block';
+
+    if (role === 'admin') {
+        document.getElementById('view-participant').style.display = 'none';
+        document.getElementById('view-admin').style.display = 'block';
+        document.getElementById('hub-welcome').innerText = 'Internal Review Dashboard';
+    } else {
+        document.getElementById('view-participant').style.display = 'block';
+        document.getElementById('view-admin').style.display = 'none';
+        document.getElementById('hub-welcome').innerText = 'Strategic Partnership Journey';
+    }
+
+    gsap.from(hub, { opacity: 0, y: 30, duration: 1, ease: "power4.out" });
+}
+
+function logout() {
+    window.location.href = 'index.html';
 }
 
 // Chat Widget Logic

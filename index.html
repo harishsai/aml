@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus | Seamless Enterprise Onboarding</title>
+    <title>Kinetix | Premium Onboarding Platform</title>
     <link rel="stylesheet" href="style.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,12 +30,10 @@
     </div>
 
     <nav class="nav">
-        <div class="nav-logo">NEXUS</div>
+        <div class="nav-logo">KINETIX</div>
         <div class="nav-links">
-            <a href="#problems" class="nav-link">The Problem</a>
-            <a href="#solution" class="nav-link">The Solution</a>
-            <a href="#" class="nav-link">Login</a>
-            <a href="#" class="nav-link btn-secondary" onclick="openSignup()">SIGNUP</a>
+            <a href="#" class="nav-link" onclick="openLogin()">LOGIN</a>
+            <a href="signup.html" class="nav-link btn-secondary">SIGNUP</a>
         </div>
     </nav>
 
@@ -88,246 +86,77 @@
             </div>
         </section>
 
-        <!-- Solution Hub Demo -->
-        <section id="demo" class="demo-section">
-            <div class="container">
-                <div class="demo-header">
-                    <h2 class="section-title liquid-text">The Unified Hub</h2>
-                    <p>A single source of truth for the entire Strategic Partnership journey.</p>
-                </div>
 
-                <div class="onboarding-container">
-                    <!-- AI Agent Status Bar -->
-                    <div class="ai-agent-status-wrapper">
-                        <div class="ai-agent-banner">
-                            <div class="ai-pulse"></div>
-                            <span id="ai-status-text">AI Agent: Monitoring Session...</span>
-                        </div>
-                    </div>
 
-                    <!-- Roadmap Visualization -->
-                    <div class="roadmap">
-                        <div class="roadmap-line"></div>
-                        <div class="roadmap-steps">
-                            <div class="roadmap-step active" onclick="jumpToStep(1)">
-                                <div class="node"></div>
-                                <span>Vetting</span>
-                            </div>
-                            <div class="roadmap-step" onclick="jumpToStep(2)">
-                                <div class="node"></div>
-                                <span>Application</span>
-                            </div>
-                            <div class="roadmap-step" onclick="jumpToStep(3)">
-                                <div class="node"></div>
-                                <span>Readiness</span>
-                            </div>
-                            <div class="roadmap-step" onclick="jumpToStep(4)">
-                                <div class="node"></div>
-                                <span>Activation</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="onboarding-card glass">
-                        <div class="scanner-line"></div>
-                        <!-- Phase 1: Vetting -->
-                        <div class="step-content active" id="step-1">
-                            <div class="step-header">
-                                <h3>Needs Assessment</h3>
-                                <div class="effort-badge high">Effort: High</div>
-                            </div>
-                            <p class="step-desc">Establish the business case and define the project scope with Internal
-                                stakeholders.</p>
-                            <form class="demo-form">
-                                <div class="input-grid">
-                                    <div class="input-group">
-                                        <label>Applicant Stakeholders</label>
-                                        <input type="text" placeholder="Legal, Business, Trading Desk">
-                                    </div>
-                                    <div class="input-group">
-                                        <label>Relationship Manager</label>
-                                        <input type="text" placeholder="Assigned Strategic RM">
-                                    </div>
-                                </div>
-                                <button type="button" class="btn-primary" onclick="nextStep(2)">Submit
-                                    Assessment</button>
-                            </form>
-                            <!-- AI Data Sourcing Agent Window -->
-                            <div class="ai-agent-window" id="agent-vetting">
-                                <div class="agent-header">
-                                    <span class="agent-name">Data Sourcing Agent</span>
-                                    <span class="agent-status">IDLE</span>
-                                </div>
-                                <div class="agent-logs" id="logs-vetting">
-                                    <p class="log-entry">> Initializing Global Registry bridge...</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Phase 2: Application -->
-                        <div class="step-content" id="step-2">
-                            <div class="step-header">
-                                <h3>Application & Risk Review</h3>
-                                <div class="effort-badge high">Effort: High</div>
-                            </div>
-                            <p class="step-desc">Navigate the Partner Participation Portal and initiate AML/KYC risk
-                                review.</p>
-                            <div class="portal-mockup">
-                                <div class="portal-item">
-                                    <span>Participation Application</span>
-                                    <span class="status pulse">In Progress</span>
-                                </div>
-                                <div class="portal-item">
-                                    <span>Risk Review Analysis</span>
-                                    <span class="status locked">Pending Submission</span>
-                                </div>
-                            </div>
-                            <button type="button" class="btn-primary" onclick="nextStep(3)">Start Portal Entry</button>
-                            <!-- AI Document Agent Window -->
-                            <div class="ai-agent-window" id="agent-app">
-                                <div class="agent-header">
-                                    <span class="agent-name">Document Agent</span>
-                                    <span class="agent-status">READY</span>
-                                </div>
-                                <div class="agent-logs" id="logs-app">
-                                    <p class="log-entry">> Awaiting corporate legal filings...</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Phase 3: Operational Readiness -->
-                        <div class="step-content" id="step-3">
-                            <div class="step-header">
-                                <h3>Operational Readiness</h3>
-                                <div class="effort-badge med">Effort: Med-High</div>
-                            </div>
-                            <p class="step-desc">Connectivity provisioning, data delivery setup, and conformance
-                                testing.</p>
-                            <div class="readiness-list">
-                                <label class="check-item">
-                                    <input type="checkbox" checked disabled>
-                                    <span>Connectivity Provisioning</span>
-                                </label>
-                                <label class="check-item">
-                                    <input type="checkbox">
-                                    <span>Data Delivery Setup</span>
-                                </label>
-                                <label class="check-item">
-                                    <input type="checkbox">
-                                    <span>Conformance Testing</span>
-                                </label>
-                            </div>
-                            <button type="button" class="btn-primary" onclick="nextStep(4)">Verify Readiness</button>
-                            <!-- AI Screening Agent Window -->
-                            <div class="ai-agent-window" id="agent-readiness">
-                                <div class="agent-header">
-                                    <span class="agent-name">Screening & Significance Agent</span>
-                                    <span class="agent-status">IDLE</span>
-                                </div>
-                                <div class="agent-logs" id="logs-readiness">
-                                    <p class="log-entry">> Monitoring technical provisioning...</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Phase 4: Activation -->
-                        <div class="step-content" id="step-4">
-                            <div class="step-header">
-                                <h3>Final Activation</h3>
-                                <div class="effort-badge low">Effort: Low-Med</div>
-                            </div>
-                            <p class="step-desc">Risk training, production staging, and official Go-Live.</p>
-                            <div class="status-grid">
-                                <div class="status-box">
-                                    <h4>Risk Training</h4>
-                                    <span class="val">Completed</span>
-                                </div>
-                                <div class="status-box">
-                                    <h4>Go-Live Date</h4>
-                                    <span class="val">T-minus 3 days</span>
-                                </div>
-                            </div>
-                            <button type="button" class="btn-primary">Execute Go-Live</button>
-                            <!-- AI Autocompletion Agent -->
-                            <div class="ai-agent-window" id="agent-active">
-                                <div class="agent-header">
-                                    <span class="agent-name">Autocompletion Agent</span>
-                                    <span class="agent-status">IDLE</span>
-                                </div>
-                                <div class="agent-logs" id="logs-active">
-                                    <p class="log-entry">> Monitoring process readiness...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Milestone Summary Table -->
-                <div class="milestone-table-wrapper">
-                    <h3>Strategic Milestones Summary</h3>
-                    <table class="milestone-table">
-                        <thead>
-                            <tr>
-                                <th>Milestone</th>
-                                <th>Activity</th>
-                                <th>Effort</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="vett">
-                                <td>Vetting</td>
-                                <td>Needs Assessment</td>
-                                <td class="effort high">H</td>
-                            </tr>
-                            <tr class="app">
-                                <td rowspan="2">Application</td>
-                                <td>Partner Participation Portal</td>
-                                <td class="effort high">H</td>
-                            </tr>
-                            <tr class="app">
-                                <td>Risk Review</td>
-                                <td class="effort high">H</td>
-                            </tr>
-                            <tr class="ready">
-                                <td rowspan="3">Operational Readiness</td>
-                                <td>Connectivity Provisioning</td>
-                                <td class="effort high">H</td>
-                            </tr>
-                            <tr class="ready">
-                                <td>Data Delivery Setup</td>
-                                <td class="effort med">M</td>
-                            </tr>
-                            <tr class="ready">
-                                <td>Conformance Testing</td>
-                                <td class="effort high">H</td>
-                            </tr>
-                            <tr class="act">
-                                <td rowspan="4">Activation</td>
-                                <td>Risk Training</td>
-                                <td class="effort low">L</td>
-                            </tr>
-                            <tr class="act">
-                                <td>Operational Readiness Learning</td>
-                                <td class="effort low">L</td>
-                            </tr>
-                            <tr class="act">
-                                <td>Stage Production Environment</td>
-                                <td class="effort med">M</td>
-                            </tr>
-                            <tr class="act">
-                                <td>Go-Live</td>
-                                <td class="effort low">L</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <footer class="footer">
-            <p>&copy; 2026 NEXUS. Empowering Global Fintech Platforms.</p>
         </footer>
     </main>
+
+    <!-- Authenticated Hub (Hidden by default) -->
+    <section id="hub" class="hub-section" style="display: none;">
+        <div class="container relative">
+            <div class="hub-header">
+                <h2 class="section-title liquid-text">Kinetix Hub</h2>
+                <p id="hub-welcome">Welcome back to your strategic dashboard.</p>
+            </div>
+
+            <!-- Case Header (Restored) -->
+            <div class="case-header glass">
+                <div class="case-info">
+                    <div class="case-id">CASE-ID: <span id="display-case-id">NEX-7829-X</span></div>
+                    <div class="client-name-header" id="display-client-name">Awaiting Registration...</div>
+                </div>
+            </div>
+
+            <div class="onboarding-card glass">
+                <div class="scanner-line"></div>
+
+                <!-- Participant View (RFI Form Restored inside Hub) -->
+                <div class="persona-content client-view" id="view-participant">
+                    <div class="step-header">
+                        <h3>Onboarding & Discovery</h3>
+                    </div>
+                    <p class="step-desc">Review and manage your partnership details with Kinetix.</p>
+
+                    <div class="status-box-simple glass">
+                        <span class="label">Current Status:</span>
+                        <span class="value tag blue">PENDING SUBMISSION</span>
+                    </div>
+
+                    <div class="form-footer-actions" style="margin-top: 30px;">
+                        <button class="btn-primary">View Full Application</button>
+                    </div>
+                </div>
+
+                <!-- Admin View (Restored) -->
+                <div class="persona-content admin-view" id="view-admin" style="display: none;">
+                    <div class="step-header">
+                        <h3>Internal Ops Review</h3>
+                        <div class="task-badge">Task ID: VET-992</div>
+                    </div>
+
+                    <div class="review-panel glass">
+                        <div class="info-row">
+                            <span class="label">Priority:</span>
+                            <span class="value tag red">HIGH</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Auto-Match:</span>
+                            <span class="value tag green">NO SANCTION HITS</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-actions">
+                        <button class="btn-approve" onclick="alert('Case Approved')">Approve Case</button>
+                        <button class="btn-reject">Request Info</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hub-footer">
+                <button class="btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </section>
 
     <!-- AI Chat Widget -->
     <div class="chat-widget">
@@ -352,100 +181,30 @@
         </button>
     </div>
 
-    <!-- Signup Modal -->
-    <div class="signup-modal" id="signup-modal">
-        <div class="signup-content glass animate-up">
-            <button class="modal-close" onclick="closeSignup()">×</button>
-            <h2 class="liquid-text">Enterprise Onboarding Registration</h2>
-            <p class="signup-sub">Initiate your strategic partnership with NEXUS.</p>
 
-            <form class="signup-form">
-                <div class="input-grid">
-                    <div class="input-group">
-                        <input type="text" id="co-name" placeholder=" ">
-                        <label for="co-name">Company Legal Name</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="lei" placeholder=" ">
-                        <label for="lei">LEI (Legal Entity Identifier)</label>
-                    </div>
-                </div>
 
-                <div class="input-grid">
-                    <div class="input-group">
-                        <select id="jurisdiction">
-                            <option value="" disabled selected hidden></option>
-                            <option>United States</option>
-                            <option>United Kingdom</option>
-                            <option>Singapore</option>
-                            <option>European Union</option>
-                        </select>
-                        <label for="jurisdiction">Primary Jurisdiction</label>
-                    </div>
-                    <div class="input-group">
-                        <select id="tier">
-                            <option value="" disabled selected hidden></option>
-                            <option>Institutional (Basic)</option>
-                            <option>Strategic (Standard)</option>
-                            <option>Global (Premium)</option>
-                        </select>
-                        <label for="tier">Service Tier</label>
-                    </div>
-                </div>
+    <!-- Login Modal -->
+    <div class="signup-modal" id="login-modal">
+        <div class="signup-content glass animate-up" style="max-width: 700px;">
+            <button class="modal-close" onclick="closeLogin()">×</button>
+            <h2 class="liquid-text">Sign In to Kinetix</h2>
+            <p class="signup-sub">Select your persona to access the platform.</p>
 
-                <div class="input-grid">
-                    <div class="input-group">
-                        <input type="text" id="fullname" placeholder=" ">
-                        <label for="fullname">Representative Full Name</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="email" id="email" placeholder=" ">
-                        <label for="email">Professional Email</label>
-                    </div>
+            <div class="login-options">
+                <div class="login-card" onclick="loginAs('participant')">
+                    <div class="login-icon">👤</div>
+                    <h3>Participant</h3>
+                    <p>Access your onboarding application and status.</p>
                 </div>
-
-                <div class="input-grid">
-                    <div class="input-group">
-                        <input type="text" id="taxid" placeholder=" ">
-                        <label for="taxid">Tax Identification Number / VAT</label>
-                    </div>
-                    <div class="input-group">
-                        <select id="business-nature">
-                            <option value="" disabled selected hidden></option>
-                            <option>Fintech & Payments</option>
-                            <option>Investment Banking</option>
-                            <option>Asset Management</option>
-                            <option>Commercial Brokerage</option>
-                        </select>
-                        <label for="business-nature">Nature of Business</label>
-                    </div>
+                <div class="login-card" onclick="loginAs('admin')">
+                    <div class="login-icon">🛡️</div>
+                    <h3>Admin / Ops</h3>
+                    <p>Review internal cases and manage approvals.</p>
                 </div>
-
-                <div class="input-grid">
-                    <div class="input-group">
-                        <select id="volume">
-                            <option value="" disabled selected hidden></option>
-                            <option>
-                                < $50M</option>
-                            <option>$50M - $500M</option>
-                            <option>$500M - $5B</option>
-                            <option>> $5B</option>
-                        </select>
-                        <label for="volume">Expected Annual Volume</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="tel" id="phone" placeholder=" ">
-                        <label for="phone">Phone Number</label>
-                    </div>
-                </div>
-
-                <div class="form-footer">
-                    <button type="button" class="btn-primary" onclick="submitSignup()">Begin Onboarding</button>
-                    <p class="terms">By clicking "Begin Onboarding", you agree to our <a href="#">Service Level
-                            Agreements</a>.</p>
-                </div>
-            </form>
+            </div>
         </div>
+    </div>
+
     </div>
 
     <script src="main.js"></script>

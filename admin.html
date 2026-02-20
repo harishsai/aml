@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Kinetix Operations</title>
+    <!-- Premium Standalone Styles -->
+    <link rel="stylesheet" href="admin_styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+
+<body>
+    <div class="admin-view">
+        <!-- Persistent Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">KINETIX</div>
+
+            <div class="nav-group">
+                <span class="nav-label">Case Queue</span>
+                <div class="nav-item active" onclick="filterTickets('')">
+                    <span>All Tickets</span>
+                    <span class="item-count" id="count-all">0</span>
+                </div>
+                <div class="nav-item" onclick="filterTickets('PENDING_REVIEW')">
+                    <span>New Requests</span>
+                    <span class="item-count" id="count-pending">0</span>
+                </div>
+                <div class="nav-item" onclick="filterTickets('VETTING_IN_PROGRESS')">
+                    <span>Active Vetting</span>
+                </div>
+                <div class="nav-item" onclick="filterTickets('APPROVED')">
+                    <span>Onboarded</span>
+                </div>
+                <div class="nav-item" onclick="filterTickets('CLARIFICATION_REQUIRED')">
+                    <span>Clarification</span>
+                </div>
+            </div>
+
+            <div class="nav-group"
+                style="margin-top: auto; border-top: 1px solid var(--dash-border); padding-top: 24px;">
+                <button class="btn-premium" onclick="logout()" style="width: 100%;">Return to Landing</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="header-left">
+                    <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--dash-primary);">Operations Portal</h1>
+                    <p style="color: var(--dash-text-muted); font-size: 0.85rem;">Internal Review & Compliance Dashboard
+                    </p>
+                </div>
+                <div class="user-info">
+                    <span id="admin-name"
+                        style="font-size: 0.85rem; font-weight: 600; color: var(--dash-text-muted);">admin@kinetix.com</span>
+                    <div
+                        style="width: 38px; height: 38px; background: #EEF2F7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; border: 1px solid var(--dash-border);">
+                        AD</div>
+                </div>
+            </header>
+
+            <div class="board-container">
+                <div class="table-container">
+                    <div class="table-header">
+                        <span>Participant Entity</span>
+                        <span>Tracking ID</span>
+                        <span>Date Submitted</span>
+                        <span>Status</span>
+                        <span></span>
+                    </div>
+                    <div id="ticket-list-container">
+                        <!-- Populated via JS -->
+                        <div
+                            style="padding: 60px; text-align: center; color: var(--dash-text-muted); font-size: 0.9rem;">
+                            <div style="margin-bottom: 12px; font-size: 1.2rem;">📡</div>
+                            Retrieving active cases...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Case Side Panel -->
+    <div class="side-panel" id="ticket-detail-overlay">
+        <span class="panel-close" onclick="closeTicketDetail()">×</span>
+        <div id="ticket-detail-content">
+            <!-- Populated via JS -->
+        </div>
+    </div>
+
+    <!-- Action Remarks Modal -->
+    <div class="remarks-modal" id="remarks-modal"
+        style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div
+            style="background: white; padding: 40px; border-radius: var(--radius-lg); width: 480px; box-shadow: var(--shadow-lg);">
+            <h4 id="remarks-title" style="margin-bottom: 12px; font-size: 1.1rem; font-weight: 700;">Case Action Remark
+            </h4>
+            <p style="color: var(--dash-text-muted); font-size: 0.85rem; margin-bottom: 24px;">Please provide context
+                for this decision for the audit log.</p>
+            <textarea id="remarks-input" placeholder="Specify internal decision details..."
+                style="width: 100%; height: 140px; padding: 16px; border: 1px solid var(--dash-border); border-radius: var(--radius-md); margin-bottom: 24px; font-family: inherit; font-size: 0.9rem; resize: none;"></textarea>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn-premium" onclick="closeRemarksModal()">Cancel</button>
+                <button class="btn-premium btn-primary" id="confirm-remark-btn">Submit Decision</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script>
+        function logout() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

@@ -1,7 +1,7 @@
 -- KINETIX PLATFORM: Entity Verification Reference Data
 -- Mock dataset for testing and verification logic
 
-CREATE TABLE IF NOT EXISTS entity_verification (
+CREATE TABLE IF NOT EXISTS client_onboarding.entity_verification (
     lei_number CHAR(20) PRIMARY KEY,
     company_name VARCHAR(255) NOT NULL,
     entity_type VARCHAR(50) NOT NULL, -- Bank, Broker-Dealer, Fund, Corporate, Other
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS entity_verification (
 );
 
 -- Mock Data (100 Records)
-INSERT INTO entity_verification (lei_number, company_name, entity_type, registered_address, country) VALUES
+INSERT INTO client_onboarding.entity_verification (lei_number, company_name, entity_type, registered_address, country) VALUES
 ('5493001KJY7UW9K12345', 'Evergreen Financial Group', 'Bank', '120 Wall Street, New York, NY 10005', 'United States'),
 ('5493002KJY7UW9K67890', 'North Star Asset Management', 'Fund', '10 Collyer Quay, Ocean Financial Centre', 'Singapore'),
 ('5493003KJY7UW9K11111', 'Riverbank Global Trade', 'Corporate', 'Canary Wharf, London E14 5AB', 'United Kingdom'),

@@ -265,29 +265,160 @@
             tag.style.color = 'var(--primary)';
         }
 
-        function handleAuth(e) {
+        // Store logged-in email for password change
+        let loggedInEmail = '';
+        let loggedInPassword = '';
+
+        async function handleAuth(e) {
             e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
             const btnText = document.querySelector('.btn-text');
             const loader = document.getElementById('auth-loader');
 
             btnText.style.display = 'none';
             loader.style.display = 'block';
 
-            setTimeout(() => {
-                // Success redirect
-                window.location.href = `index.html?login=success&role=${role}#hub`;
-            }, 1200);
+            try {
+                if (role === 'admin') {
+                    const response = await fetch('http://localhost:8000/admin/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: email, password: password })
+                    });
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        alert("Invalid Admin Credentials");
+                        btnText.style.display = 'block'; loader.style.display = 'none';
+                    }
+                } else {
+                    // Participant login
+                    const response = await fetch('http://localhost:8000/auth/participant-login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: email, password: password })
+                    });
+                    const data = await response.json();
+
+                    if (response.ok && data.status === 'success') {
+                        // Store session info
+                        sessionStorage.setItem('participant_email', data.email);
+                        sessionStorage.setItem('participant_name', data.full_name);
+                        loggedInEmail = data.email;
+                        loggedInPassword = password;
+
+                        if (data.must_change_password) {
+                            // Show forced password change modal
+                            btnText.style.display = 'block'; loader.style.display = 'none';
+                            document.getElementById('change-pwd-modal').style.display = 'flex';
+                        } else {
+                            window.location.href = 'portal.html';
+                        }
+                    } else {
+                        alert(data.detail || "Invalid credentials. Please check your email and password.");
+                        btnText.style.display = 'block'; loader.style.display = 'none';
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Authentication Service Unavailable. Is backend running?");
+                btnText.style.display = 'block'; loader.style.display = 'none';
+            }
+        }
+
+        async function submitPasswordChange() {
+            const newPwd = document.getElementById('new-password').value;
+            const confirmPwd = document.getElementById('confirm-password').value;
+            const errEl = document.getElementById('pwd-error');
+            const btn = document.getElementById('change-pwd-btn');
+
+            errEl.style.display = 'none';
+
+            if (newPwd.length < 8) {
+                errEl.textContent = 'Password must be at least 8 characters.';
+                errEl.style.display = 'block'; return;
+            }
+            if (newPwd !== confirmPwd) {
+                errEl.textContent = 'Passwords do not match.';
+                errEl.style.display = 'block'; return;
+            }
+            if (newPwd === loggedInPassword) {
+                errEl.textContent = 'New password cannot be the same as your temporary password.';
+                errEl.style.display = 'block'; return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'UPDATING...';
+
+            try {
+                const response = await fetch('http://localhost:8000/auth/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: loggedInEmail,
+                        current_password: loggedInPassword,
+                        new_password: newPwd
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById('change-pwd-modal').style.display = 'none';
+                    window.location.href = 'portal.html';
+                } else {
+                    errEl.textContent = data.detail || 'Password change failed.';
+                    errEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = 'SET NEW PASSWORD';
+                }
+            } catch (err) {
+                errEl.textContent = 'Service unavailable. Please try again.';
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'SET NEW PASSWORD';
+            }
         }
 
         // Entrance animation
-        gsap.from('#premium-card', {
-            opacity: 0,
-            y: 50,
-            scale: 0.95,
-            duration: 1,
-            ease: "expo.out"
-        });
+        gsap.from('#premium-card', { opacity: 0, y: 50, scale: 0.95, duration: 1, ease: "expo.out" });
     </script>
+
+    <!-- Forced Password Change Modal -->
+    <div id="change-pwd-modal"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center;">
+        <div
+            style="background:white; border-radius:12px; padding:45px; width:100%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="text-align:center; margin-bottom:25px;">
+                <div
+                    style="width:56px;height:56px;background:#fff3cd;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 15px;font-size:1.6rem;">
+                    🔐</div>
+                <h2 style="margin:0 0 8px;color:#1B5E20;font-size:1.4rem;font-weight:800;">Set Your New Password</h2>
+                <p style="margin:0;color:#666;font-size:0.9rem;">You're using a temporary password. Please set a secure
+                    password to continue.</p>
+            </div>
+            <div style="margin-bottom:18px;">
+                <label
+                    style="display:block;font-size:0.8rem;font-weight:700;color:#333;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">New
+                    Password</label>
+                <input type="password" id="new-password" placeholder="Min. 8 characters"
+                    style="width:100%;padding:14px 16px;border:1px solid #dee2e6;border-radius:6px;font-size:0.95rem;box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:20px;">
+                <label
+                    style="display:block;font-size:0.8rem;font-weight:700;color:#333;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Confirm
+                    Password</label>
+                <input type="password" id="confirm-password" placeholder="Re-enter password"
+                    style="width:100%;padding:14px 16px;border:1px solid #dee2e6;border-radius:6px;font-size:0.95rem;box-sizing:border-box;">
+            </div>
+            <p id="pwd-error"
+                style="display:none;color:#dc3545;font-size:0.85rem;margin:0 0 15px;padding:10px;background:#fff5f5;border-radius:6px;border-left:3px solid #dc3545;">
+            </p>
+            <button id="change-pwd-btn" onclick="submitPasswordChange()"
+                style="width:100%;padding:15px;background:#1B5E20;color:white;border:none;border-radius:6px;font-size:0.9rem;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all 0.2s;">SET
+                NEW PASSWORD</button>
+        </div>
+    </div>
 </body>
 
 </html>

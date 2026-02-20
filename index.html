@@ -18,193 +18,106 @@
 </head>
 
 <body>
+    <div class="mesh-container"></div>
 
-    <body>
-        <div class="mesh-container"></div>
+    <nav class="nav">
+        <div class="nav-logo">KINETIX</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link" onclick="openLogin()">LOGIN</a>
+            <a href="signup.html" class="nav-link btn-secondary">SIGNUP</a>
+        </div>
+    </nav>
 
-        <nav class="nav">
-            <div class="nav-logo">KINETIX</div>
-            <div class="nav-links">
-                <a href="#" class="nav-link" onclick="openLogin()">LOGIN</a>
-                <a href="signup.html" class="nav-link btn-secondary">SIGNUP</a>
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h2 class="hero-pre">Institutional Excellence</h2>
+                <h1 class="hero-title">Onboarding, <br>Simplified.</h1>
+                <p class="hero-subtitle">The industry-leading platform for institutional compliance, risk
+                    management, and global market access.</p>
+                <div class="hero-cta">
+                    <a href="#problems" class="btn-primary">Explore the Future</a>
+                    <span class="scroll-down">Scroll to discover</span>
+                </div>
             </div>
-        </nav>
+            <div class="hero-bg"></div>
+        </section>
 
-        <main>
-            <!-- Hero Section -->
-            <section class="hero">
-                <div class="container">
-                    <h2 class="hero-pre">Institutional Excellence</h2>
-                    <h1 class="hero-title">Onboarding, <br>Simplified.</h1>
-                    <p class="hero-subtitle">The industry-leading platform for institutional compliance, risk
-                        management, and global market access.</p>
-                    <div class="hero-cta">
-                        <a href="#demo" class="btn-primary">Explore the Future</a>
-                        <span class="scroll-down">Scroll to discover</span>
+        <!-- Pain Points Section -->
+        <section id="problems" class="problems">
+            <div class="container">
+                <h2 class="section-title liquid-text">The Industry Bottleneck</h2>
+                <div class="pain-grid">
+                    <div class="pain-card">
+                        <span class="pain-num">01</span>
+                        <p>Manual document collection and validation</p>
                     </div>
-                </div>
-                <div class="hero-bg"></div>
-            </section>
-
-            <!-- Pain Points Section -->
-            <section id="problems" class="problems">
-                <div class="container">
-                    <h2 class="section-title liquid-text">The Industry Bottleneck</h2>
-                    <div class="pain-grid">
-                        <div class="pain-card">
-                            <span class="pain-num">01</span>
-                            <p>Manual document collection and validation</p>
-                        </div>
-                        <div class="pain-card">
-                            <span class="pain-num">02</span>
-                            <p>Complex regulatory compliance (KYC, AML, tax) processes.</p>
-                        </div>
-                        <div class="pain-card">
-                            <span class="pain-num">03</span>
-                            <p>High level of effort involved in the initial onboarding milestones.</p>
-                        </div>
-                        <div class="pain-card">
-                            <span class="pain-num">04</span>
-                            <p>Limited realtime visibility into onboarding progress.</p>
-                        </div>
-                        <div class="pain-card">
-                            <span class="pain-num">05</span>
-                            <p>High human dependency and scalability limits</p>
-                        </div>
-                        <div class="pain-card">
-                            <span class="pain-num">06</span>
-                            <p>Siloed systems and multiple platforms involved (Salesforce, BPM etc)</p>
-                        </div>
+                    <div class="pain-card">
+                        <span class="pain-num">02</span>
+                        <p>Complex regulatory compliance (KYC, AML, tax) processes.</p>
                     </div>
-                </div>
-            </section>
-
-
-
-            </footer>
-        </main>
-
-        <!-- Authenticated Hub (Hidden by default) -->
-        <section id="hub" class="hub-section" style="display: none;">
-            <div class="container relative">
-                <div class="hub-header">
-                    <h2 class="section-title liquid-text">Kinetix Hub</h2>
-                    <p id="hub-welcome">Welcome back to your strategic dashboard.</p>
-                </div>
-
-                <!-- Case Header (Restored) -->
-                <div class="case-header">
-                    <div class="case-info">
-                        <div class="case-id">CASE-ID: <span id="display-case-id">NEX-7829-X</span></div>
-                        <div class="client-name-header" id="display-client-name">Awaiting Registration...</div>
+                    <div class="pain-card">
+                        <span class="pain-num">03</span>
+                        <p>High level of effort involved in the initial onboarding milestones.</p>
                     </div>
-                </div>
-
-                <div class="onboarding-card">
-                    <div class="scanner-line"></div>
-
-                    <!-- Participant View (RFI Form Restored inside Hub) -->
-                    <div class="persona-content client-view" id="view-participant">
-                        <div class="step-header">
-                            <h3>Onboarding & Discovery</h3>
-                        </div>
-                        <p class="step-desc">Review and manage your partnership details with Kinetix.</p>
-
-                        <div class="status-box-simple">
-                            <span class="label">Current Status:</span>
-                            <span class="value tag blue">PENDING SUBMISSION</span>
-                        </div>
-
-                        <div class="form-footer-actions" style="margin-top: 30px;">
-                            <button class="btn-primary">View Full Application</button>
-                        </div>
+                    <div class="pain-card">
+                        <span class="pain-num">04</span>
+                        <p>Limited realtime visibility into onboarding progress.</p>
                     </div>
-
-                    <!-- Admin View (Restored) -->
-                    <div class="persona-content admin-view" id="view-admin" style="display: none;">
-                        <div class="step-header">
-                            <h3>Internal Ops Review</h3>
-                            <div class="task-badge">Task ID: VET-992</div>
-                        </div>
-
-                        <div class="review-panel">
-                            <div class="info-row">
-                                <span class="label">Priority:</span>
-                                <span class="value tag red">HIGH</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="label">Auto-Match:</span>
-                                <span class="value tag green">NO SANCTION HITS</span>
-                            </div>
-                        </div>
-
-                        <div class="admin-actions">
-                            <button class="btn-approve" onclick="alert('Case Approved')">Approve Case</button>
-                            <button class="btn-reject">Request Info</button>
-                        </div>
+                    <div class="pain-card">
+                        <span class="pain-num">05</span>
+                        <p>High human dependency and scalability limits</p>
                     </div>
-                </div>
-
-                <div class="hub-footer">
-                    <button class="btn-secondary" onclick="logout()">Logout</button>
+                    <div class="pain-card">
+                        <span class="pain-num">06</span>
+                        <p>Siloed systems and multiple platforms involved (Salesforce, BPM etc)</p>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- AI Chat Widget -->
-        <div class="chat-widget">
-            <div class="chat-window glass" id="chat-window">
-                <div class="chat-header">
-                    <div class="ai-pulse"></div>
-                    <span>Kyra Assistant</span>
-                    <button class="chat-close" onclick="toggleChat()">×</button>
-                </div>
-                <div class="chat-messages" id="chat-messages">
-                    <div class="message ai">
-                        <p>Hello! I'm Kyra, your Strategic Onboarding assistant. How can I help you today?</p>
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <div class="nav-logo">KINETIX</div>
+                        <p>Strategic Institutional Onboarding</p>
                     </div>
                 </div>
-                <div class="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="Type a message..."
-                        onkeypress="handleChatKey(event)">
-                    <button onclick="sendChatMessage()">Send</button>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 Kinetix Strategic Partners. All rights reserved.</p>
                 </div>
             </div>
-            <button class="chat-toggle btn-primary" onclick="toggleChat()">
-                <span class="chat-icon">💬</span>
-            </button>
-        </div>
+        </footer>
+    </main>
 
+    <!-- Login Modal -->
+    <div class="signup-modal" id="login-modal">
+        <div class="signup-content animate-up"
+            style="max-width: 700px; background: #FFFFFF; border: 1px solid var(--border); box-shadow: 0 50px 100px rgba(0,0,0,0.1);">
+            <button class="modal-close" onclick="closeLogin()" style="color: var(--primary);">×</button>
+            <h2 style="color: var(--primary); font-weight: 800;">Log In to Kinetix</h2>
+            <p class="signup-sub" style="color: var(--text-muted);">Please select your portal to continue.</p>
 
-
-        <!-- Login Modal -->
-        <div class="signup-modal" id="login-modal">
-            <div class="signup-content animate-up"
-                style="max-width: 700px; background: #FFFFFF; border: 1px solid var(--border); box-shadow: 0 50px 100px rgba(0,0,0,0.1);">
-                <button class="modal-close" onclick="closeLogin()" style="color: var(--primary);">×</button>
-                <h2 style="color: var(--primary); font-weight: 800;">Log In to Kinetix</h2>
-                <p class="signup-sub" style="color: var(--text-muted);">Please select your portal to continue.</p>
-
-                <div class="login-options">
-                    <div class="login-card" onclick="loginAs('participant')"
-                        style="background: var(--surface); border: 1px solid var(--border);">
-                        <div class="login-icon">👤</div>
-                        <h3 style="color: var(--primary);">Participant Portal</h3>
-                        <p style="color: var(--text-muted);">Manage your institutional onboarding application.</p>
-                    </div>
-                    <div class="login-card" onclick="loginAs('admin')"
-                        style="background: var(--surface); border: 1px solid var(--border);">
-                        <div class="login-icon">🛡️</div>
-                        <h3 style="color: var(--primary);">Internal Operations</h3>
-                        <p style="color: var(--text-muted);">Review case files and manage regulatory approvals.</p>
-                    </div>
+            <div class="login-options">
+                <div class="login-card" onclick="loginAs('participant')"
+                    style="background: var(--surface); border: 1px solid var(--border); cursor: pointer; padding: 30px; border-radius: 8px; transition: all 0.3s;">
+                    <div class="login-icon" style="font-size: 2rem; margin-bottom: 15px;">👤</div>
+                    <h3 style="color: var(--primary); margin-bottom: 10px;">Participant Portal</h3>
+                    <p style="color: var(--text-muted);">Manage your institutional onboarding application.</p>
+                </div>
+                <div class="login-card" onclick="loginAs('admin')"
+                    style="background: var(--surface); border: 1px solid var(--border); cursor: pointer; padding: 30px; border-radius: 8px; transition: all 0.3s;">
+                    <div class="login-icon" style="font-size: 2rem; margin-bottom: 15px;">🛡️</div>
+                    <h3 style="color: var(--primary); margin-bottom: 10px;">Internal Operations</h3>
+                    <p style="color: var(--text-muted);">Review case files and manage regulatory approvals.</p>
                 </div>
             </div>
         </div>
+    </div>
 
-        </div>
-
-        <script src="main.js"></script>
-    </body>
+    <script src="main.js"></script>
+</body>
 
 </html>

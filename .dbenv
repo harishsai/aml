@@ -1,0 +1,16 @@
+# Database Configuration
+DB_HOST=pgs-test-db.cluster-ce5iuiycmlzd.us-east-1.rds.amazonaws.com
+DB_PORT=5432
+DB_NAME=pgsdbtst
+DB_USER=client_onboarding
+DB_PASSWORD=We11d0ne
+
+# Session Initialization
+DB_INIT_COMMAND="SET SESSION CHARACTERISTICS AS TRANSACTION READ WRITE;"
+
+# SMTP Configuration (For real emails)
+SMTP_SERVER=smtp-relay.brevo.com
+SMTP_PORT=587
+SMTP_USER=a2dea0001@smtp-brevo.com
+SMTP_PASS=xsmtpsib-6abf481ba03940a9b230d603edbff4af233050ed796e84768ff4aee08fda58e5-pehU8FcGmJD6cOoh
+SMTP_SENDER=dbacloudora@gmail.com

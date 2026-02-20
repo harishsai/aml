@@ -3,7 +3,7 @@
 
 -- SCENARIO 1: CLEAN PASS (80 Records)
 -- Matches entity_verification.lei_number and company_name exactly.
-INSERT INTO onboarding_details (company_name, company_address, country, lei_identifier, entity_type, business_activity, source_of_funds, expected_volume, status) VALUES
+INSERT INTO client_onboarding.onboarding_details (company_name, company_address, country, lei_identifier, entity_type, business_activity, source_of_funds, expected_volume, status) VALUES
 ('Evergreen Financial Group', '120 Wall Street, New York, NY 10005', 'United States', '5493001KJY7UW9K12345', 'Bank', 'Investment Banking', 'Operating Revenues', '$10M - $100M', 'PENDING_REVIEW'),
 ('North Star Asset Management', '10 Collyer Quay, Ocean Financial Centre', 'Singapore', '5493002KJY7UW9K67890', 'Fund', 'Asset Management', 'Investment Returns', '$100M+', 'PENDING_REVIEW'),
 ('Riverbank Global Trade', 'Canary Wharf, London E14 5AB', 'United Kingdom', '5493003KJY7UW9K11111', 'Corporate', 'Fintech / Payments', 'Operating Revenues', '$1M - $10M', 'PENDING_REVIEW'),

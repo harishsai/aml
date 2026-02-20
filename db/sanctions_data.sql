@@ -1,7 +1,7 @@
 -- KINETIX PLATFORM: OFAC-Style Sanctions Reference Data
 -- Mock dataset with Entity Addresses for compliance screening
 
-CREATE TABLE IF NOT EXISTS sanctions_list (
+CREATE TABLE IF NOT EXISTS client_onboarding.sanctions_list (
     id SERIAL PRIMARY KEY,
     entity_name VARCHAR(255) NOT NULL,
     entity_type VARCHAR(50) NOT NULL, -- INDIVIDUAL, ENTITY, VESSEL, AIRCRAFT
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS sanctions_list (
 );
 
 -- Mock Data (200 Records)
-INSERT INTO sanctions_list (entity_name, entity_type, program, list_type, country, entity_address, remarks) VALUES
+INSERT INTO client_onboarding.sanctions_list (entity_name, entity_type, program, list_type, country, entity_address, remarks) VALUES
 -- RUSSIA (60 Records)
 ('VTB Bank PJSC', 'ENTITY', 'RUSSIA-EO14024', 'SDN', 'Russia', '12 Presnenskaya Naberezhnaya, Moscow', 'Major state-owned bank'),
 ('Sberbank', 'ENTITY', 'RUSSIA-EO14024', 'SDN', 'Russia', '19 Vavilova St, Moscow', 'Russian financial services giant'),

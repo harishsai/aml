@@ -6,7 +6,7 @@ sys.path.append(os.getcwd())
 from backend.email_utils import send_status_update_email
 
 def test_rejection_email():
-    recipient = "harishsai@gmail.com"
+    recipient = 
     tracking_id = "KTX-202602-01014"
     status = "REJECTED"
     remarks = "Documentation provided is insufficient for entity verification. Please provide the UBO declaration."

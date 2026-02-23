@@ -3,7 +3,7 @@ DB_HOST=database-1.cluster-chonchr3dgsg.us-east-1.rds.amazonaws.com
 DB_PORT=5432
 DB_NAME=postgres
 DB_USER=db_master
-DB_PASSWORD=-3IB-EzqV*6]5i]J5unsHM?5a6D6
+DB_PASSWORD=
 DB_SSL_MODE=require
 
 # Session Initialization
@@ -19,5 +19,5 @@ SMTP_SENDER=dbacloudora@gmail.com
 # AWS Configuration
 S3_BUCKET_NAME=kinetix-onboarding-docs-hp
 AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=AKIA3ONYJGLFY2BI7UXV
-AWS_SECRET_ACCESS_KEY=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
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=

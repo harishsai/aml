@@ -10,10 +10,10 @@ DB_SSL_MODE=require
 DB_INIT_COMMAND="SET SESSION CHARACTERISTICS AS TRANSACTION READ WRITE;"
 
 # SMTP Configuration (For real emails)
-SMTP_SERVER=smtp-relay.brevo.com
+SMTP_SERVER=
 SMTP_PORT=587
-SMTP_USER=a2dea0001@smtp-brevo.com
-SMTP_PASS=xsmtpsib-6abf481ba03940a9b230d603edbff4af233050ed796e84768ff4aee08fda58e5-pehU8FcGmJD6cOoh
+SMTP_USER=
+SMTP_PASS=
 SMTP_SENDER=dbacloudora@gmail.com
 
 # AWS Configuration

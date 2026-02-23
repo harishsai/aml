@@ -14,10 +14,10 @@ SMTP_SERVER=
 SMTP_PORT=587
 SMTP_USER=
 SMTP_PASS=
-SMTP_SENDER=dbacloudora@gmail.com
+SMTP_SENDER=
 
 # AWS Configuration
-S3_BUCKET_NAME=kinetix-onboarding-docs-hp
+S3_BUCKET_NAME=
 AWS_REGION=us-east-1
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=

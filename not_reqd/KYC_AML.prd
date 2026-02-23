@@ -1,0 +1,406 @@
+# KYC / AML Product Requirements Document
+# Kinetix Platform — Onboarding Compliance Engine
+# Version: 1.0 | Date: 2026-02-21
+# Regulatory Basis: FINRA Rule 3310 · FATF Recommendations · EU AMLD · USA PATRIOT Act §326 · FinCEN CDD Rule
+
+================================================================================
+SECTION 1: OVERVIEW
+================================================================================
+
+Kinetix operates a two-layer compliance framework at onboarding:
+
+  Layer 1 — KYC (Know Your Customer / Know Your Business)
+    Answer: "Is this entity who they claim to be?"
+    Nature: One-time identity verification at signup
+    Regulation: PATRIOT Act §326, FATF R10, FINRA CIP
+
+  Layer 2 — AML (Anti-Money Laundering)
+    Answer: "Does this entity pose a money laundering or sanctions risk?"
+    Nature: Risk assessment at onboarding + ongoing monitoring
+    Regulation: FINRA Rule 3310, FATF R1/R12/R24, EU AMLD, FinCEN
+
+Both layers run as part of the same 3-step signup form. The form collects
+all raw data; an AI Agent pipeline processes it post-submission.
+
+================================================================================
+SECTION 2: KYC — STEPS AND COVERAGE
+================================================================================
+
+KYC = Identity Collection + Verification (Steps 1 & 2 of Signup Form)
+
+2.1 CIP — Customer Identification Program (Step 1: Entity Information)
+--------------------------------------------------------------------------------
+Field                   | AML Purpose                       | Regulation
+------------------------|-----------------------------------|-------------------
+company_name            | Entity name for sanctions match   | FINRA CIP
+lei_identifier          | GLEIF entity lookup (20-char)     | ISO 17442
+registration_number     | Legal existence validation        | FATF R10
+incorporation_date      | Shell company flag (< 1yr old)    | FATF R10
+entity_type             | Risk classification               | FINRA CIP
+ownership_type          | Public/Private → drives UBO logic | FinCEN CDD Rule
+regulatory_status       | Regulated / Unregulated           | FATF R1
+regulatory_authority    | Authority name (if regulated)     | FATF R1
+company_address         | Registered address verification   | FATF R10
+city / state / country  | Incorporation jurisdiction risk   | FATF R1
+email                   | Contact identity (institutional)  | FINRA CIP
+phone_number            | Contact verification              | FINRA CIP
+
+2.2 KYB — Know Your Business / Document Verification (Step 2: Documents)
+--------------------------------------------------------------------------------
+Document                | KYC Check Performed               | Regulation
+------------------------|-----------------------------------|-------------------
+Board of Directors PDF  | Director name extraction via OCR  | FINRA CIP
+Audited Financials PDF  | AUM, revenue, auditor name        | FATF R10
+Ownership Structure PDF | UBO names + stake percentages     | FATF R24 / FinCEN
+Certificate of Incorp.  | Reg number, entity name, date     | FATF R10
+
+2.3 Director Declaration (Step 2b)
+--------------------------------------------------------------------------------
+Field                   | KYC Purpose
+------------------------|-----------------------------------------------------
+director_full_name      | Identity — at least 1 required
+director_role           | CEO / CFO / COO / Chairman / Director / Other
+director_nationality    | Jurisdiction risk linkage
+director_country_of_res | Cross-border risk flag
+
+Validation: Minimum 1 director required. Names cross-checked against
+OCR output from BOD list PDF in Stage 3 (document consistency check).
+
+2.4 UBO Declaration (Step 2c — shown if ownership_type != Public)
+--------------------------------------------------------------------------------
+Field                   | KYC Purpose                       | Regulation
+------------------------|-----------------------------------|-------------------
+ubo_full_name           | Identity of beneficial owner      | FATF R24
+ubo_stake_percent       | Ownership threshold (≥ 25%)       | FinCEN CDD Rule
+ubo_nationality         | Jurisdiction risk                 | FATF R24
+ubo_country_of_residence| Offshore / sanctioned domicile    | FATF R24
+ubo_date_of_birth       | Age verification (must be adult)  | FINRA CIP
+ubo_is_pep              | PEP flag per UBO                  | FATF R12
+
+Validation: All UBO stakes must total ≤ 100%.
+At least 1 UBO required if ownership_type = Privately Held.
+
+================================================================================
+SECTION 3: AML — STEPS AND COVERAGE
+================================================================================
+
+AML = Risk Profiling + Screening + Decision (Step 3 of Signup Form +
+      AI Agent Stages 1–3 post-submission)
+
+3.1 AML Questionnaire (Step 3: AML Questions)
+--------------------------------------------------------------------------------
+Field                   | AML Purpose                       | Regulation
+------------------------|-----------------------------------|-------------------
+business_activity       | Sector risk classification        | FATF R1
+source_of_funds         | Cash flow risk (Operating Rev,    | FATF R10
+                        | Investment Returns, Loans, Other)  |
+source_of_wealth        | Origin of initial capital         | FATF R10
+                        | (distinct from source_of_funds)    |
+expected_volume         | Volume vs entity size/age check   | FATF R1
+countries_operation     | Multi-country geographic risk     | FATF R1 / R19
+tax_residency_country   | FATCA / CRS classification        | FATCA / CRS
+pep_declaration         | Political exposure (entity-level) | FATF R12
+sanctions               | Self-declared sanctions history   | OFAC / UN / EU
+aml_program_description | AML programme maturity            | FINRA 3310
+correspondent_bank      | Correspondent bank + jurisdiction | FATF R13
+trading_address         | Address confirmation / mismatch   | FATF R10
+adverse_media_consent   | GDPR consent for news screening   | EU GDPR Art. 6
+
+================================================================================
+SECTION 4: AI AGENT ARCHITECTURE
+================================================================================
+
+4.1 System Architecture
+--------------------------------------------------------------------------------
+
+  POST /signup
+      │
+      ├── save_onboarding_details()   → status: PENDING_REVIEW
+      ├── Creates user (temp password)
+      ├── Sends confirmation email (tracking ID)
+      └── Enqueues background task: run_aml_orchestrator(onboarding_id)
+
+  OrchestratorAgent
+      │
+      ├── Loads full onboarding record
+      ├── Creates run_id (UUID groups all logs for this run)
+      │
+      ├── [STAGE 1] KYCAgent / IdentityAndSanctionsAgent         ← KYC + AML
+      │       │
+      │       ├── lei_verification()
+      │       │     Input:  lei_identifier, company_name
+      │       │     Action: GLEIF API → compare entity name (fuzzy match)
+      │       │     Output: {lei_valid, name_match_score, lei_status}
+      │       │     Tech:   External API + rapidfuzz
+      │       │
+      │       ├── entity_name_sanctions_check()
+      │       │     Input:  company_name
+      │       │     Action: Fuzzy match vs sanctions_list table (200 SDN records)
+      │       │     Output: {hit, matched_name, program, confidence_score}
+      │       │     Tech:   PostgreSQL + python-Levenshtein / rapidfuzz
+      │       │
+      │       ├── ubo_sanctions_check()
+      │       │     Input:  ubos[].full_name (each UBO looped)
+      │       │     Action: Same fuzzy match per UBO
+      │       │     Output: [{ubo_name, hit, matched_name, confidence}]
+      │       │     Tech:   Same as entity check, looped
+      │       │
+      │       ├── director_sanctions_check()
+      │       │     Input:  directors[].full_name
+      │       │     Action: Fuzzy match vs sanctions_list (INDIVIDUAL records)
+      │       │     Output: [{director_name, hit, matched_name, confidence}]
+      │       │     Tech:   rapidfuzz
+      │       │
+      │       ├── pep_check()
+      │       │     Input:  pep_declaration, ubos[].is_pep, directors names
+      │       │     Action: Self-declared PEP + cross-reference reference table
+      │       │     Output: {pep_flagged, flagged_persons: []}
+      │       │     Tech:   Rules + local PEP reference table
+      │       │
+      │       ├── email_domain_check()
+      │       │     Input:  email
+      │       │     Action: Block public domains (@gmail, @yahoo, @hotmail)
+      │       │     Output: {is_institutional, domain}
+      │       │     Tech:   Hardcoded blocklist rules
+      │       │
+      │       └── registration_format_check()
+      │             Input:  registration_number, country
+      │             Action: Validate format by country-specific regex
+      │             Output: {valid, format_expected}
+      │             Tech:   Rules engine (regex per country)
+      │
+      │     → Writes N rows to ai_agent_logs (one per sub-check)
+      │     → Composite: stage_1_risk = LOW / MEDIUM / HIGH / CRITICAL
+      │     → Status update: AML_STAGE1_COMPLETE
+      │
+      │     ⏸ HUMAN GATE 1
+      │       Admin reviews: entity match, sanctions hits, PEP flags
+      │       Admin action:  CONTINUE | CLARIFICATION_REQUIRED | REJECT
+      │
+      ├── [STAGE 2] AMLRiskAgent / RiskProfilingAgent            ← AML
+      │       │
+      │       ├── country_risk_score()
+      │       │     Input:  country, countries_operation[], tax_residency_country
+      │       │     Action: Check each against FATF greylist/blacklist table
+      │       │     Output: {countries: [{name, risk_level}], highest_risk}
+      │       │     Tech:   Aurora PostgreSQL country_risk_reference table
+      │       │
+      │       ├── ubo_jurisdiction_risk()
+      │       │     Input:  ubos[].country_of_residence
+      │       │     Action: Flag offshore / sanctioned / high-risk UBO domiciles
+      │       │     Output: {flagged_ubos: [], risk_level}
+      │       │     Tech:   Rules + country_risk_reference table
+      │       │
+      │       ├── aml_questionnaire_score()
+      │       │     Input:  source_of_funds, aml_program_confirmed, source_of_wealth
+      │       │     Action: Weighted rule-based scoring (0–100)
+      │       │     Output: {score, flags: []}
+      │       │     Tech:   Rules engine (weighted rules)
+      │       │
+      │       ├── source_of_funds_classification()
+      │       │     Input:  source_of_funds (dropdown value)
+      │       │     Action: Risk map: Investment Returns=LOW, Cash=HIGH
+      │       │     Output: {sof_risk: LOW / MEDIUM / HIGH}
+      │       │     Tech:   Hardcoded risk map
+      │       │
+      │       └── volume_vs_entity_check()
+      │             Input:  expected_volume, entity_type, incorporation_date
+      │             Action: Flag if volume is disproportionate to entity size/age
+      │             Output: {flagged, reason}
+      │             Tech:   Rules engine
+      │
+      │     → Writes 5 rows to ai_agent_logs
+      │     → Composite: stage_2_risk = LOW / MEDIUM / HIGH
+      │     → Status update: AML_STAGE2_COMPLETE
+      │
+      │     ⏸ HUMAN GATE 2
+      │       Admin reviews: country risk breakdown, AML score, volume flags
+      │       Admin action:  CONTINUE | CLARIFICATION_REQUIRED | REJECT
+      │
+      ├── [STAGE 3] DocumentAgent (Phase 2 — LLM + OCR)          ← KYC + AML
+      │       │
+      │       ├── ocr_extract(bod_list_content)
+      │       │     Input:  PDF bytes (Board of Directors list)
+      │       │     Action: Extract director names
+      │       │     Output: {directors_found: [names], confidence}
+      │       │     Tech:   AWS Textract / Google Vision OCR
+      │       │
+      │       ├── ocr_extract(ownership_content)
+      │       │     Input:  PDF bytes (Ownership Structure)
+      │       │     Action: Extract UBO names + percentage stakes
+      │       │     Output: {ubos_found: [{name, stake}], confidence}
+      │       │     Tech:   OCR + regex for percentage extraction
+      │       │
+      │       ├── ocr_extract(financials_content)
+      │       │     Input:  PDF bytes (Audited Financials)
+      │       │     Action: Extract AUM, revenue, auditor name, audit opinion
+      │       │     Output: {aum, revenue, auditor, audit_opinion}
+      │       │     Tech:   OCR + LLM key-value extraction
+      │       │
+      │       ├── cross_check_consistency()
+      │       │     Input:  OCR results vs declared form values
+      │       │     Action: Compare director names, UBO names/stakes, AUM vs
+      │       │             expected_volume; flag mismatches
+      │       │     Output: {mismatches: [], consistency_score: 0–100}
+      │       │     Tech:   LLM (Gemini Pro / GPT-4o) structured comparison prompt
+      │       │
+      │       └── adverse_media_check()   ← conditional on adverse_media_consent
+      │             Input:  company_name, UBO names
+      │             Action: Query NewsAPI → LLM summarises findings + scores
+      │             Output: {adverse_found, summary, articles_reviewed}
+      │             Tech:   NewsAPI + LLM RAG (Gemini / GPT-4o)
+      │
+      │     → Writes 5 rows to ai_agent_logs
+      │     → Composite: stage_3_risk = LOW / MEDIUM / HIGH
+      │     → Status update: AML_STAGE3_COMPLETE
+      │
+      │     ⏸ HUMAN GATE 3
+      │       Admin reviews: document consistency, red flags, adverse media
+      │       Admin FINAL ACTION: APPROVE | REJECT | CLARIFICATION_REQUIRED | CANCEL
+      │
+      └── [FINAL] ReportAgent
+              │
+              ├── composite_risk_score()   → weighted average across all stages
+              ├── generate_narrative()     → LLM plain-English risk summary
+              ├── write final row to ai_agent_logs (type: FINAL_REPORT)
+              └── status → AML_REVIEW_READY (admin dashboard notified)
+
+================================================================================
+SECTION 5: RISK SCORING MODEL
+================================================================================
+
+Composite Score Weights:
+
+  Factor                        | Weight | LOW=0          | MED=50          | HIGH=100
+  ------------------------------|--------|----------------|-----------------|------------------
+  Sanctions hit — entity        |  35%   | No match       | Indirect/partial | Direct SDN hit
+  Sanctions hit — any UBO       |  15%   | No match       | Indirect         | Direct SDN hit
+  Country risk (highest)        |  20%   | FATF compliant | FATF monitoring  | FATF blacklist
+  UBO jurisdiction              |  10%   | Major economy  | Offshore centre  | Sanctioned state
+  PEP flag                      |  10%   | No PEP         | Self-declared    | PEP + verified
+  Source of funds risk          |   5%   | Investment ret | Mixed            | Cash/undisclosed
+  AML program                   |   5%   | Declared+desc  | Declared only    | Not declared
+
+Final Classification:
+   0 – 25  → GREEN    LOW       Standard Due Diligence
+  26 – 50  → YELLOW   MEDIUM    Enhanced monitoring
+  51 – 75  → RED      HIGH      Enhanced Due Diligence (EDD) required
+  76 – 100 → BLACK    CRITICAL  Auto-escalate — likely reject
+
+================================================================================
+SECTION 6: TECHNOLOGY STACK PER AGENT
+================================================================================
+
+  Agent                   | Technology                        | Phase
+  ------------------------|-----------------------------------|-------
+  OrchestratorAgent       | Python class + FastAPI BG task    | 1
+  KYCAgent — LEI check    | GLEIF REST API + rapidfuzz        | 1
+  KYCAgent — Sanctions    | PostgreSQL + python-Levenshtein   | 1
+  KYCAgent — PEP          | Rules + local reference table     | 1
+  KYCAgent — Email/Reg    | Rules engine (Python)             | 1
+  AMLRiskAgent — Country  | PostgreSQL country_risk_reference | 1
+  AMLRiskAgent — Score    | Weighted rules engine             | 1
+  DocumentAgent — OCR     | AWS Textract / Google Vision      | 2
+  DocumentAgent — Consist | LLM (Gemini Pro / GPT-4o)        | 2
+  AdverseMediaAgent       | NewsAPI + LLM RAG                 | 2
+  ReportAgent             | LLM (Gemini Pro)                  | 2
+  Re-screening Scheduler  | Python scheduler + rules          | 3
+  Anomaly Detection       | ML model (scikit-learn / TF)      | 3
+
+================================================================================
+SECTION 7: KEY DESIGN PRINCIPLES
+================================================================================
+
+1. HUMAN GATES BETWEEN STAGES
+   Agents never auto-approve. Admin must explicitly trigger the next stage.
+   This satisfies "human in the loop" requirements for regulated AML.
+
+2. FULL AUDIT TRAIL
+   Every agent writes to ai_agent_logs with:
+     run_id, onboarding_id, agent_name, stage, check_name,
+     input_context (JSONB), output (JSONB), flags (TEXT[]),
+     risk_level, recommendation, ai_summary, model_used,
+     duration_ms, tokens_used
+
+3. RULES-FIRST, LLM-SECOND
+   Stages 1 & 2 use deterministic rules (no hallucination risk on sanctions
+   matching). LLM is used only for narrative generation and document
+   cross-checking in Stage 3.
+
+4. FAIL-SAFE DEFAULTS
+   If any agent errors, the case remains at PENDING_REVIEW.
+   It never auto-approves on failure.
+
+5. COMPOSITE SCORE, NOT BINARY
+   Weighted scoring shows HOW risky an entity is, enabling graded responses:
+   Standard review → EDD → outright rejection.
+
+6. SINGLE SOURCE OF TRUTH
+   pep_declaration is a discrete BOOLEAN column, NOT duplicated in aml_questions JSONB.
+   countries_operation is stored as TEXT[] (array), not plain text.
+
+================================================================================
+SECTION 8: PHASED IMPLEMENTATION PLAN
+================================================================================
+
+Phase 1 — Rules Engine (No LLM / No OCR)
+  Priority: High | Timeline: Now
+  - AMLAgent Stage 1: LEI (GLEIF API), sanctions fuzzy match, PEP, email domain
+  - AMLAgent Stage 2: Country risk, UBO jurisdiction, AML score, volume check
+  - OrchestratorAgent: Coordinate stages, write ai_agent_logs, set status
+  - Admin dashboard: Stage-by-stage findings with CONTINUE/REJECT/CLARIFY
+
+Phase 2 — LLM + OCR Layer
+  Priority: High | Timeline: Next sprint
+  - LLM narrative generation (Gemini Pro) — final risk summary for admin
+  - OCR extraction from BOD, Ownership, Financials PDFs
+  - Adverse media check (NewsAPI + LLM RAG summarisation)
+  - Document consistency cross-check (OCR vs declared form values)
+
+Phase 3 — Ongoing Monitoring
+  Priority: Medium | Timeline: Future
+  - Sanctions list sync scheduler (weekly OFAC/EU/UN pull)
+  - Re-screening trigger on UBO/director changes
+  - Transaction volume anomaly detection (ML)
+
+================================================================================
+SECTION 9: DATABASE TABLES SUPPORTING THIS PROCESS
+================================================================================
+
+  Table                         | Role in KYC/AML Process
+  ------------------------------|--------------------------------------------
+  onboarding_details            | All form fields — KYC + AML questionnaire
+  onboarding_ubos               | UBO identity records (KYC)
+  onboarding_directors          | Director identity records (KYC)
+  ai_agent_logs                 | Full audit trail of every agent check
+  sanctions_list                | 200 SDN records (OFAC-style) for screening
+  entity_verification           | 100 LEI records for entity lookup
+  country_risk_reference        | 18 FATF greylist/blacklist entries
+  users                         | Participant accounts (linked to onboarding)
+  onboarding_audit_log          | Admin actions + status transitions
+
+================================================================================
+SECTION 10: REGULATORY COMPLIANCE CHECKLIST
+================================================================================
+
+  Requirement                         | Regulation          | Phase 1 | Phase 2
+  ------------------------------------|---------------------|---------|--------
+  CIP — entity identity collection    | FINRA 3310 / PATRIOT|   YES   |   —
+  Document-based KYB                  | FATF R10            |   YES   |  OCR
+  UBO identification >= 25%           | FATF R24 / FinCEN   |   YES   |   —
+  Director identification             | FINRA CIP           |   YES   |   —
+  Sanctions screening (OFAC/UN/EU)    | All regulators      |  LOCAL  |  API
+  PEP screening                       | FATF R12            |   YES   |  YES
+  Country risk assessment             | FATF R1             |   YES   |   —
+  Source of funds + wealth            | FATF R10            |   YES   |   —
+  Adverse media check                 | Best practice       |   —     |  YES
+  Risk classification (LOW/MED/HIGH)  | FATF R1             |   YES   |   —
+  EDD for high-risk entities          | FATF R19            |  FLAG   |  YES
+  Full audit trail                    | All regulators      |   YES   |   —
+  5-year record retention             | FINRA CIP           |  DB OK  |  POLICY
+  GDPR consent for media screening    | EU GDPR Art. 6      |   YES   |   —
+
+================================================================================
+END OF DOCUMENT
+Version: 1.0 | Kinetix Platform | Confidential
+================================================================================

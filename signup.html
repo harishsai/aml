@@ -6,66 +6,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Get Started | Kinetix</title>
     <link rel="stylesheet" href="style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
         :root {
-            --form-bg: #FFFFFF;
-            --form-border: #DEE2E6;
-            --input-bg: #F8F9FA;
-            --primary: #1B5E20;
-            --accent: #2E7D32;
-            --text: #212529;
-            --border: #DEE2E6;
+            --bg: #f3f4f6;
+            --surface: #ffffff;
+            --primary: #064e3b;
+            --accent: #10b981;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --input-bg: #ffffff;
+            --border: #e5e7eb;
+            --font-main: 'Inter', system-ui, sans-serif;
         }
 
-        .auth-page {
+        body {
+            background-color: var(--bg);
+            margin: 0;
+            padding: 60px 20px;
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            background: #F4F7F9;
-            position: relative;
-            overflow-x: hidden;
-            overflow-y: auto;
-            font-family: 'Inter', sans-serif;
-            padding: 60px 20px;
-        }
-
-        .auth-bg {
-            display: none;
-            /* Hide neon balls */
+            align-items: flex-start;
+            font-family: var(--font-main);
+            color: var(--text);
+            box-sizing: border-box;
         }
 
         .auth-card {
             width: 100%;
-            max-width: 650px;
-            padding: 50px;
-            background: var(--form-bg);
-            border: 1px solid var(--form-border);
+            max-width: 600px;
+            padding: 40px;
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            z-index: 10;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
             position: relative;
-            box-shadow: 0 20px 50px rgba(0, 51, 102, 0.1);
+            box-sizing: border-box;
         }
 
         .brand-logo {
             font-weight: 800;
-            font-size: 1.6rem;
-            letter-spacing: 2px;
+            font-size: 1.8rem;
+            letter-spacing: 4px;
             color: var(--primary);
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
-        /* Progress Indicator */
         .progress-bar {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
             position: relative;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .progress-bar::before {
@@ -75,43 +73,47 @@
             left: 0;
             width: 100%;
             height: 1px;
-            background: var(--border);
-            z-index: 1;
+            background: #cbd5e1;
+            transform: translateY(-50%);
         }
 
         .progress-dot {
             width: 12px;
             height: 12px;
-            background: var(--bg);
+            background: #ffffff;
             border: 2px solid var(--border);
             border-radius: 50%;
             z-index: 2;
-            transition: all 0.4s;
-            position: relative;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .progress-dot.active {
-            background: var(--accent);
-            border-color: var(--accent);
-            box-shadow: 0 0 15px var(--accent);
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+            transform: scale(1.3);
         }
 
         .progress-dot.completed {
-            background: var(--accent);
-            border-color: var(--accent);
+            background: var(--primary);
+            border-color: var(--primary);
         }
 
         .step-title {
-            font-size: 1.8rem;
-            color: var(--primary);
-            margin-bottom: 10px;
+            font-size: 2rem;
+            color: var(--text);
+            margin-bottom: 8px;
             font-weight: 800;
+            letter-spacing: -0.5px;
+            text-align: center;
         }
 
         .step-sub {
             color: var(--text-muted);
             font-size: 0.95rem;
-            margin-bottom: 35px;
+            margin-bottom: 40px;
+            font-weight: 500;
+            text-align: center;
         }
 
         .form-step {
@@ -122,19 +124,37 @@
             display: block;
         }
 
-        /* Form Fields */
+        .section-header {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--primary);
+            margin: 30px 0 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-header::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
         .field {
             position: relative;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .field label {
             position: absolute;
-            left: 20px;
+            left: 16px;
             top: 18px;
             color: var(--text-muted);
             font-size: 0.9rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.25s;
             pointer-events: none;
         }
 
@@ -142,81 +162,118 @@
         .field select,
         .field textarea {
             width: 100%;
-            padding: 26px 20px 10px;
+            padding: 28px 16px 10px;
             background: var(--input-bg);
             border: 1px solid var(--border);
-            border-radius: 4px;
-            /* More corporate rectangular corners */
+            border-radius: 8px;
             color: var(--text);
-            font-size: 0.95rem;
-            transition: all 0.3s;
+            font-size: 1rem;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .field input:focus,
-        .field select:focus {
+        .field select:focus,
+        .field textarea:focus {
             outline: none;
-            border-color: var(--accent);
-            background: rgba(0, 255, 163, 0.03);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(6, 78, 59, 0.05);
         }
 
         .field input:focus+label,
         .field input:not(:placeholder-shown)+label,
         .field select:focus+label,
-        .field select:not([value=""])+label {
+        .field select:not([value=""])+label,
+        .field select:not(:invalid)+label,
+        .field textarea:focus+label,
+        .field textarea:not(:placeholder-shown)+label {
             top: 8px;
-            left: 20px;
             font-size: 0.7rem;
-            color: var(--accent);
-            font-weight: 600;
-            letter-spacing: 1px;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
         }
 
-        .field select option {
-            background-color: #111;
-            color: #fff;
-        }
-
-        .input-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        /* Questionnaire Styles */
-        .question-group {
-            margin-bottom: 25px;
-            padding: 20px;
-            background: var(--surface);
-            border-radius: 8px;
+        .repeat-block {
+            background: #f9fafb;
             border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 20px;
+            position: relative;
         }
 
-        .question-label {
-            display: block;
-            font-size: 0.9rem;
+        .repeat-block-title {
+            font-size: 0.85rem;
+            font-weight: 700;
             color: var(--text);
             margin-bottom: 15px;
-            font-weight: 600;
+            text-transform: uppercase;
         }
 
-        .radio-options {
-            display: flex;
-            gap: 20px;
+        .btn-remove {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
         }
 
-        .radio-btn {
+        .btn-add {
+            width: 100%;
+            padding: 14px;
+            background: #f0fdf4;
+            border: 2px dashed var(--primary);
+            border-radius: 10px;
+            color: var(--primary);
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 25px;
+        }
+
+        .file-upload-group {
+            margin-bottom: 25px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            background: #fff;
+            border: 1px dashed var(--border);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             cursor: pointer;
-            color: var(--text);
-            font-size: 0.9rem;
         }
 
-        .radio-btn input {
-            width: auto;
-            padding: 0;
-            accent-color: var(--accent);
+        .file-input-wrapper:hover {
+            border-color: var(--primary);
+            background: #f9fafb;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-icon {
+            font-size: 1.2rem;
+        }
+
+        .file-label-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
 
         .btn-group {
@@ -228,337 +285,406 @@
         .btn-auth {
             flex: 1;
             padding: 18px;
-            border-radius: 12px;
+            border-radius: 10px;
             font-weight: 700;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: all 0.4s;
             border: none;
+            text-transform: uppercase;
             letter-spacing: 1px;
+            transition: all 0.2s;
         }
 
         .btn-next {
-            background: var(--accent);
-            color: #000;
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-next:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
         }
 
         .btn-reset {
-            background: #FFFFFF;
+            background: #f3f4f6;
             color: var(--text);
             border: 1px solid var(--border);
         }
 
-        .btn-reset:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+        .checkbox-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            align-items: flex-start;
         }
 
-        .btn-next:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(0, 255, 163, 0.2);
+        .checkbox-group input {
+            margin-top: 3px;
+        }
+
+        .checkbox-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .back-link a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
         }
 
         .back-link a:hover {
             color: var(--primary);
         }
-
-        /* File Upload Styling */
-        .file-upload-group {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-        }
-
-        .file-upload-title {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 20px;
-            display: block;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .file-field {
-            margin-bottom: 15px;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: var(--input-bg);
-            border: 1px dashed var(--border);
-            padding: 12px 15px;
-            border-radius: 4px;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .file-input-wrapper:hover {
-            border-color: var(--primary);
-            background: rgba(27, 94, 32, 0.02);
-        }
-
-        .file-input-wrapper input[type="file"] {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .file-label-text {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .file-icon {
-            font-size: 1.2rem;
-            color: var(--primary);
-        }
     </style>
 </head>
 
-<body class="auth-page">
+<body>
     <div class="auth-card" id="signup-card">
         <div class="brand-logo">KINETIX</div>
 
         <div class="progress-bar">
             <div class="progress-dot active" data-step="1"></div>
             <div class="progress-dot" data-step="2"></div>
+            <div class="progress-dot" data-step="3"></div>
+            <div class="progress-dot" data-step="4"></div>
         </div>
 
         <form id="signup-form">
-            <!-- STEP 1: CONTACT & COMPANY -->
+            <!-- STEP 1 -->
             <div class="form-step active" id="step-1">
-                <h2 class="step-title">Initial Phase</h2>
-                <p class="step-sub">Introduce your entity to the Kinetix ecosystem.</p>
-
-                <div class="input-row">
-                    <div class="field">
-                        <input type="text" id="fname" placeholder=" " required>
-                        <label for="fname">First Name</label>
-                    </div>
-                    <div class="field">
-                        <input type="text" id="lname" placeholder=" " required>
-                        <label for="lname">Last Name</label>
+                <div
+                    style="background: #f0fdf4; border: 1px dashed var(--primary); padding: 15px; border-radius: 8px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px;">
+                    <div style="font-size: 1.5rem;">🪄</div>
+                    <div style="flex: 1;">
+                        <div
+                            style="font-size: 0.7rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">
+                            Magic PIN Auto-fill</div>
+                        <input type="password" id="magic-pin" placeholder="Enter PIN (e.g. 2026)"
+                            style="background: transparent; border: none; border-bottom: 1px solid var(--primary); width: 100%; padding: 5px 0; font-family: monospace; font-size: 1rem; color: var(--primary); outline: none;"
+                            oninput="checkMagicPIN(this.value)">
                     </div>
                 </div>
 
+                <h2 class="step-title">Entity Information</h2>
+                <p class="step-sub">Corporate identity and legal details.</p>
+
+                <div class="section-header">Primary Contact</div>
                 <div class="field">
-                    <input type="text" id="company" placeholder=" " required>
-                    <label for="company">Company Name</label>
+                    <input type="text" id="fname" placeholder=" " required>
+                    <label for="fname">First Name *</label>
                 </div>
-
                 <div class="field">
-                    <textarea id="address" placeholder=" " required rows="2"
-                        style="padding-top: 30px; min-height: 80px;"></textarea>
-                    <label for="address">Company Registered Address</label>
+                    <input type="text" id="lname" placeholder=" " required>
+                    <label for="lname">Last Name *</label>
                 </div>
-
-                <div class="input-row">
-                    <div class="field">
-                        <select id="country" required onchange="updateStates()">
-                            <option value="" disabled selected hidden></option>
-                            <option value="US">United States</option>
-                            <option value="UK">United Kingdom</option>
-                            <option value="IN">India</option>
-                            <option value="SG">Singapore</option>
-                            <option value="AE">United Arab Emirates</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <label for="country">Country</label>
-                    </div>
-                    <div class="field">
-                        <input type="text" id="state" list="state-list" required disabled placeholder=" ">
-                        <label for="state">State / Province</label>
-                        <datalist id="state-list"></datalist>
-                    </div>
-                </div>
-
                 <div class="field">
                     <input type="email" id="email" placeholder=" " required>
-                    <label for="email">Professional Email Address</label>
+                    <label for="email">Professional Email *</label>
                 </div>
-
-                <div class="input-row">
-                    <div class="field">
-                        <input type="text" id="city" list="city-list" placeholder=" " required>
-                        <label for="city">City</label>
-                        <datalist id="city-list"></datalist>
-                    </div>
-                    <div class="field">
-                        <input type="text" id="zip" placeholder=" " required>
-                        <label for="zip">Zip / Postal Code</label>
-                    </div>
-                </div>
-
                 <div class="field">
-                    <input type="tel" id="phone" placeholder=" " required pattern="^\+[1-9]\d{1,14}$"
-                        title="Please enter a valid international phone number starting with + (e.g. +123456789)">
-                    <label for="phone">Phone Number (with Country Code)</label>
+                    <input type="tel" id="phone" placeholder=" " required>
+                    <label for="phone">Phone Number *</label>
                 </div>
 
+                <div class="section-header">Registered Office</div>
                 <div class="field">
-                    <input type="text" id="lei" placeholder=" " required>
-                    <label for="lei">Legal Entity Identifier (LEI)</label>
+                    <input type="text" id="company" placeholder=" " required>
+                    <label for="company">Legal Entity Name *</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="dba-name" placeholder=" ">
+                    <label for="dba-name">DBA Name</label>
+                </div>
+                <div class="field">
+                    <input type="url" id="website" placeholder=" ">
+                    <label for="website">Company Website</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="address" placeholder=" " required>
+                    <label for="address">Full Registered Address *</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="country" placeholder=" " required>
+                    <label for="country">Country (ISO) *</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="state" placeholder=" ">
+                    <label for="state">State / Province</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="city" placeholder=" " required>
+                    <label for="city">City *</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="zip" placeholder=" " required>
+                    <label for="zip">Zip / Postal Code *</label>
                 </div>
 
+                <div class="section-header">Regulatory Data</div>
+                <div class="field">
+                    <input type="text" id="lei" placeholder=" " minlength="20" maxlength="20">
+                    <label for="lei">LEI (20 chars)</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="registration-number" placeholder=" " required>
+                    <label for="registration-number">Company Registration No. *</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="ein-number" placeholder=" " required>
+                    <label for="ein-number">EIN / TIN *</label>
+                </div>
+                <div class="field">
+                    <input type="date" id="incorporation-date" required>
+                    <label for="incorporation-date">Incorporation Date *</label>
+                </div>
+                <div class="field">
+                    <select id="regulatory-status" onchange="toggleRegAuthority()" required>
+                        <option value="" disabled selected></option>
+                        <option value="Regulated">Regulated</option>
+                        <option value="Unregulated">Unregulated</option>
+                    </select>
+                    <label for="regulatory-status">Regulatory Status *</label>
+                </div>
+                <div class="field" id="reg-authority-wrapper" style="display:none;">
+                    <input type="text" id="regulatory-authority" placeholder=" ">
+                    <label for="regulatory-authority">Regulatory Authority</label>
+                </div>
                 <div class="field">
                     <select id="entity-type" required>
-                        <option value="" disabled selected hidden></option>
+                        <option value="" disabled selected></option>
                         <option value="bank">Bank</option>
                         <option value="broker-dealer">Broker-Dealer</option>
-                        <option value="fund">Fund</option>
+                        <option value="fund">Investment Fund</option>
                         <option value="corporate">Corporate</option>
-                        <option value="other">Other</option>
                     </select>
-                    <label for="entity-type">Entity Type</label>
+                    <label for="entity-type">Entity Type *</label>
                 </div>
-
-                <div class="file-upload-group">
-                    <span class="file-upload-title">Compliance Documentation</span>
-
-                    <div class="file-field">
-                        <div class="file-input-wrapper">
-                            <span class="file-icon">📄</span>
-                            <span class="file-label-text" id="label-bod">Board of Directors List</span>
-                            <input type="file" id="file-bod" accept=".pdf,.doc,.docx" required
-                                onchange="updateFileLabel(this, 'label-bod')">
-                        </div>
-                    </div>
-
-                    <div class="file-field">
-                        <div class="file-input-wrapper">
-                            <span class="file-icon">📊</span>
-                            <span class="file-label-text" id="label-financials">Financials (Audited Balance
-                                Sheet)</span>
-                            <input type="file" id="file-financials" accept=".pdf,.jpg,.png" required
-                                onchange="updateFileLabel(this, 'label-financials')">
-                        </div>
-                    </div>
-
-                    <div class="file-field">
-                        <div class="file-input-wrapper">
-                            <span class="file-icon">🏢</span>
-                            <span class="file-label-text" id="label-ownership">Ownership Structure</span>
-                            <input type="file" id="file-ownership" accept=".pdf,.jpg,.png" required
-                                onchange="updateFileLabel(this, 'label-ownership')">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field" style="margin-top: 24px;">
-                    <select id="product" required>
-                        <option value="" disabled selected hidden></option>
-                        <option value="payments">Global Payments</option>
-                        <option value="fx">FX Solutions</option>
-                        <option value="compliance">Compliance API</option>
+                <div class="field">
+                    <select id="ownership-type" onchange="toggleUBOSection()" required>
+                        <option value="" disabled selected></option>
+                        <option value="Publicly Traded">Publicly Traded</option>
+                        <option value="Privately Held">Privately Held</option>
+                        <option value="Subsidiary">Subsidiary</option>
                     </select>
-                    <label for="product">Product Interest</label>
+                    <label for="ownership-type">Ownership Type *</label>
                 </div>
 
                 <div class="btn-group">
-                    <button type="button" class="btn-auth btn-reset" onclick="resetForm()">RESET</button>
-                    <button type="button" class="btn-auth btn-next" onclick="goToStep(2)">NEXT STEP</button>
+                    <button type="button" class="btn-auth btn-next" onclick="goToStep(2)">NEXT STEP →</button>
                 </div>
             </div>
 
-            <!-- STEP 2: AML QUESTIONNAIRE -->
+            <!-- STEP 2 -->
             <div class="form-step" id="step-2">
-                <h2 class="step-title">AML Assessment</h2>
-                <p class="step-sub">Standard due diligence for institutional access.</p>
+                <h2 class="step-title">Compliance Docs</h2>
+                <p class="step-sub">KYB documentation and board details.</p>
 
-                <div class="field">
-                    <input type="text" id="reg-num" placeholder=" " required>
-                    <label for="reg-num">Registration Number</label>
-                </div>
-
-                <div class="field">
-                    <select id="ownership-type" required>
-                        <option value="" disabled selected hidden></option>
-                        <option>Publicly Traded</option>
-                        <option>Privately Held</option>
-                        <option>Government Owned</option>
-                        <option>Subsidiary</option>
-                    </select>
-                    <label for="ownership-type">Ownership Type</label>
-                </div>
-
-                <div class="field">
-                    <select id="business-activity" required>
-                        <option value="" disabled selected hidden></option>
-                        <option>Investment Banking</option>
-                        <option>Asset Management</option>
-                        <option>Retail Banking</option>
-                        <option>Fintech / Payments</option>
-                        <option>Energy / Commodities</option>
-                        <option>Real Estate</option>
-                        <option>Other</option>
-                    </select>
-                    <label for="business-activity">Primary Business Activity</label>
-                </div>
-
-                <div class="field">
-                    <select id="source-of-funds" required>
-                        <option value="" disabled selected hidden></option>
-                        <option>Operating Revenues</option>
-                        <option>Shareholder Capital</option>
-                        <option>Investment Returns</option>
-                        <option>Loan / Credit Facility</option>
-                        <option>Other</option>
-                    </select>
-                    <label for="source-of-funds">Source of Funds</label>
-                </div>
-
-                <div class="field">
-                    <select id="expected-volume" required>
-                        <option value="" disabled selected hidden></option>
-                        <option>
-                            < $1M</option>
-                        <option>$1M - $10M</option>
-                        <option>$10M - $100M</option>
-                        <option>$100M+</option>
-                    </select>
-                    <label for="expected-volume">Expected Monthly Volume (USD)</label>
-                </div>
-
-                <div class="field">
-                    <input type="text" id="countries-op" placeholder=" " required>
-                    <label for="countries-op">Main Countries of Operation</label>
-                </div>
-
-                <div class="question-group">
-                    <span class="question-label">Any Sanctions or PEP exposure? *</span>
-                    <div class="radio-options">
-                        <label class="radio-btn"><input type="radio" name="sanctions" value="no" required checked>
-                            No</label>
-                        <label class="radio-btn"><input type="radio" name="sanctions" value="yes" required> Yes</label>
+                <div class="section-header">Required Uploads</div>
+                <div class="file-upload-group">
+                    <div class="file-input-wrapper">
+                        <span class="file-icon">📄</span>
+                        <span class="file-label-text" id="label-bod">Board of Directors List *</span>
+                        <input type="file" id="file-bod" required onchange="updateFileLabel(this,'label-bod')">
+                    </div>
+                    <div class="file-input-wrapper">
+                        <span class="file-icon">📊</span>
+                        <span class="file-label-text" id="label-financials">Audited Financial Statements *</span>
+                        <input type="file" id="file-financials" required
+                            onchange="updateFileLabel(this,'label-financials')">
+                    </div>
+                    <div class="file-input-wrapper">
+                        <span class="file-icon">🏢</span>
+                        <span class="file-label-text" id="label-ownership">Ownership Structure / UBO Declaration
+                            *</span>
+                        <input type="file" id="file-ownership" required
+                            onchange="updateFileLabel(this,'label-ownership')">
+                    </div>
+                    <div class="file-input-wrapper">
+                        <span class="file-icon">📋</span>
+                        <span class="file-label-text" id="label-incorporation">Certificate of Incorporation</span>
+                        <input type="file" id="file-incorporation"
+                            onchange="updateFileLabel(this,'label-incorporation')">
+                    </div>
+                    <div class="file-input-wrapper">
+                        <span class="file-icon">🏦</span>
+                        <span class="file-label-text" id="label-bank-statement">Bank Statement</span>
+                        <input type="file" id="file-bank-statement"
+                            onchange="updateFileLabel(this,'label-bank-statement')">
+                    </div>
+                    <div class="file-input-wrapper">
+                        <span class="file-icon">🪪</span>
+                        <span class="file-label-text" id="label-ein-cert">EIN Certificate</span>
+                        <input type="file" id="file-ein-cert" onchange="updateFileLabel(this,'label-ein-cert')">
+                    </div>
+                    <div class="file-input-wrapper">
+                        <span class="file-icon">🆔</span>
+                        <span class="file-label-text" id="label-ubo-id">UBO Identification</span>
+                        <input type="file" id="file-ubo-id" onchange="updateFileLabel(this,'label-ubo-id')">
                     </div>
                 </div>
 
-                <div class="question-group">
-                    <span class="question-label">Confirm established AML Program? *</span>
-                    <div class="radio-options">
-                        <label class="radio-btn"><input type="radio" name="aml" value="yes" required checked>
-                            Yes</label>
-                        <label class="radio-btn"><input type="radio" name="aml" value="no" required> No</label>
-                    </div>
+                <div class="section-header">Management</div>
+                <div id="directors-container"></div>
+                <button type="button" class="btn-add" onclick="addDirector()">+ Add Director</button>
+
+                <div id="ubo-section" style="display:none;">
+                    <div class="section-header">UBO List</div>
+                    <div id="ubos-container"></div>
+                    <button type="button" class="btn-add" onclick="addUBO()">+ Add UBO</button>
                 </div>
 
                 <div class="btn-group">
                     <button type="button" class="btn-auth btn-reset" onclick="goToStep(1)">BACK</button>
-                    <button type="submit" class="btn-auth btn-next">SUBMIT REQUEST</button>
+                    <button type="button" class="btn-auth btn-next" onclick="goToStep(3)">NEXT STEP →</button>
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="form-step" id="step-3">
+                <h2 class="step-title">Risk Profile</h2>
+                <p class="step-sub">AML questionnaire and operational profile.</p>
+
+                <div class="section-header">Service & Operations</div>
+                <div class="field">
+                    <select id="product" required>
+                        <option value="" disabled selected></option>
+                        <option value="payments">Payments & Settlements</option>
+                        <option value="fx">FX & Treasury</option>
+                        <option value="compliance">Compliance Services</option>
+                    </select>
+                    <label for="product">Primary Product Interest *</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="countries-operation" placeholder=" " required>
+                    <label for="countries-operation">Countries of Operation (e.g. US, UK) *</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="tax-residency-country" placeholder=" " required>
+                    <label for="tax-residency-country">Tax Residency Country *</label>
+                </div>
+
+                <div class="section-header">Declarations</div>
+                <div class="field">
+                    <select id="sanctions" required>
+                        <option value="no" selected>No matches</option>
+                        <option value="yes">Matches exist</option>
+                    </select>
+                    <label for="sanctions">Sanctions Match? *</label>
+                </div>
+                <div class="field">
+                    <select id="pep_declaration" required>
+                        <option value="no" selected>No PEP involvement</option>
+                        <option value="yes">PEP involved</option>
+                    </select>
+                    <label for="pep_declaration">PEP Status *</label>
+                </div>
+                <div class="field">
+                    <select id="aml" onchange="toggleAMLDescription()" required>
+                        <option value="" disabled selected></option>
+                        <option value="yes">Yes, we have a program</option>
+                        <option value="no">No active program</option>
+                    </select>
+                    <label for="aml">Internal AML/CFT Program? *</label>
+                </div>
+                <div class="field" id="aml-desc-wrapper" style="display:none;">
+                    <textarea id="aml-program-description" placeholder=" " style="height: 80px;"></textarea>
+                    <label for="aml-program-description">Program Description</label>
+                </div>
+
+                <div class="section-header">Operational Details</div>
+                <div class="field">
+                    <input type="text" id="business-activity" placeholder=" " required>
+                    <label for="business-activity">Nature of Business *</label>
+                </div>
+                <div class="field">
+                    <select id="expected-volume" required>
+                        <option value="<$1M">&lt; $1M / Mo</option>
+                        <option value="$1M-$10M">$1M - $10M / Mo</option>
+                        <option value="$10M+">$10M+ / Mo</option>
+                    </select>
+                    <label for="expected-volume">Monthly Volume *</label>
+                </div>
+                <div class="field">
+                    <textarea id="source-of-funds" placeholder=" " required style="height: 80px;"></textarea>
+                    <label for="source-of-funds">Source of Funds *</label>
+                </div>
+                <div class="field">
+                    <textarea id="source-of-wealth" placeholder=" " required style="height: 80px;"></textarea>
+                    <label for="source-of-wealth">Source of Wealth *</label>
+                </div>
+                <div class="field">
+                    <select id="trading-address-different" onchange="toggleTradingAddress()" required>
+                        <option value="no" selected>No, same as registered</option>
+                        <option value="yes">Yes, different address</option>
+                    </select>
+                    <label for="trading-address-different">Trading Address Different? *</label>
+                </div>
+                <div class="field" id="trading-address-wrapper" style="display:none;">
+                    <input type="text" id="trading-address" placeholder=" ">
+                    <label for="trading-address">Trading Address</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="correspondent-bank" placeholder=" ">
+                    <label for="correspondent-bank">Correspondent Bank (Optional)</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="adverse-media-consent" checked required>
+                    <label for="adverse-media-consent">I consent to automated screening and continuous monitoring.
+                        *</label>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-auth btn-reset" onclick="goToStep(2)">BACK</button>
+                    <button type="button" class="btn-auth btn-next" onclick="goToStep(4)">NEXT STEP →</button>
+                </div>
+            </div>
+
+            <!-- STEP 4 -->
+            <div class="form-step" id="step-4">
+                <h2 class="step-title">Settlement</h2>
+                <p class="step-sub">Banking details for corporate settlements.</p>
+
+                <div class="section-header">Payout Account</div>
+                <div class="field">
+                    <input type="text" id="bank-name" placeholder=" " required>
+                    <label for="bank-name">Bank Name *</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="routing-number" placeholder=" " required>
+                    <label for="routing-number">Routing / SWIFT *</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="account-number" placeholder=" " required>
+                    <label for="account-number">Account Number *</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="mcc-code" placeholder=" ">
+                    <label for="mcc-code">MCC Code (Optional)</label>
+                </div>
+
+                <div class="checkbox-group" style="margin-top: 30px;">
+                    <input type="checkbox" id="terms-consent" required>
+                    <label for="terms-consent">I certify that all provided info is accurate. *</label>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-auth btn-reset" onclick="goToStep(3)">BACK</button>
+                    <button type="submit" class="btn-auth btn-next">SUBMIT APPLICATION</button>
                 </div>
             </div>
         </form>
 
         <div class="back-link">
-            <a href="index.html">← Return to Main Application</a>
+            <a href="index.html">← Return to Hub</a>
         </div>
     </div>
 
@@ -566,215 +692,304 @@
         function updateFileLabel(input, labelId) {
             const label = document.getElementById(labelId);
             if (input.files && input.files[0]) {
-                label.innerText = input.files[0].name;
+                label.innerHTML = input.files[0].name;
                 label.style.color = 'var(--primary)';
-                label.style.fontWeight = '600';
-            } else {
-                label.innerText = label.getAttribute('data-original') || 'Select File';
-                label.style.color = 'var(--text-muted)';
             }
         }
 
-        // Initialize original labels
-        document.querySelectorAll('.file-label-text').forEach(label => {
-            label.setAttribute('data-original', label.innerText);
-        });
+        function setProgress(step) {
+            document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+                dot.classList.remove('active', 'completed');
+                if (i + 1 < step) dot.classList.add('completed');
+                if (i + 1 === step) dot.classList.add('active');
+            });
+        }
 
-        // Form Logic
         function goToStep(step) {
-            const s1 = document.getElementById('step-1');
-            const s2 = document.getElementById('step-2');
-            const dots = document.querySelectorAll('.progress-dot');
+            const steps = [
+                document.getElementById('step-1'),
+                document.getElementById('step-2'),
+                document.getElementById('step-3'),
+                document.getElementById('step-4')
+            ];
+            const current = steps.findIndex(s => s.classList.contains('active'));
 
-            if (step === 2) {
-                // Validate Step 1 - Strictly Top-Down
-                const step1El = document.getElementById('step-1');
-                const inputs = step1El.querySelectorAll('input, select, textarea');
-                let firstInvalid = null;
-
+            if (step > current + 1) {
+                const inputs = steps[current].querySelectorAll('input[required], select[required], textarea[required]');
                 for (const input of inputs) {
-                    if (!input.checkValidity()) {
-                        firstInvalid = input;
-                        break;
-                    }
+                    if (!input.checkValidity()) { input.reportValidity(); return; }
                 }
-
-                if (firstInvalid) {
-                    firstInvalid.reportValidity();
-                    return;
-                }
-
-                gsap.to(s1, {
-                    opacity: 0, x: -20, duration: 0.4, onComplete: () => {
-                        s1.classList.remove('active');
-                        s2.classList.add('active');
-                        gsap.fromTo(s2, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.4 });
-                        dots[1].classList.add('active');
-                    }
-                });
-            } else {
-                gsap.to(s2, {
-                    opacity: 0, x: 20, duration: 0.4, onComplete: () => {
-                        s2.classList.remove('active');
-                        s1.classList.add('active');
-                        gsap.fromTo(s1, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4 });
-                        dots[1].classList.remove('active');
-                    }
-                });
             }
+
+            gsap.to(steps[current], {
+                opacity: 0, x: step > current + 1 ? -15 : 15, duration: 0.25, onComplete: () => {
+                    steps[current].classList.remove('active');
+                    steps[step - 1].classList.add('active');
+                    gsap.fromTo(steps[step - 1], { opacity: 0, x: step > current + 1 ? 15 : -15 }, { opacity: 1, x: 0, duration: 0.3 });
+                    setProgress(step);
+                }
+            });
         }
 
-        function resetForm() {
-            document.getElementById('signup-form').reset();
+        function toggleUBOSection() {
+            const val = document.getElementById('ownership-type').value;
+            const uboSection = document.getElementById('ubo-section');
+            uboSection.style.display = (val === 'Privately Held' || val === 'Subsidiary') ? 'block' : 'none';
         }
 
-        // Address Logic
-        const statesData = {
-            "US": [
-                "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
-                "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
-                "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
-                "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
-                "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
-            ],
-            "IN": [
-                "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
-                "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
-                "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
-            ],
-            "UK": ["England", "Scotland", "Wales", "Northern Ireland"],
-            "SG": ["Central", "North", "South"],
-            "AE": ["Dubai", "Abu Dhabi", "Sharjah"],
-            "Other": []
-        };
+        function toggleRegAuthority() {
+            const val = document.getElementById('regulatory-status').value;
+            document.getElementById('reg-authority-wrapper').style.display = (val === 'Regulated') ? 'block' : 'none';
+        }
 
-        const citySuggestions = {
-            "US": ["New York City", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose"],
-            "IN": ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", "Kolkata", "Surat", "Pune", "Jaipur"],
-            "UK": ["London", "Birmingham", "Manchester", "Glasgow", "Liverpool", "Leeds", "Sheffield", "Edinburgh", "Bristol", "Leicester"]
-        };
+        function toggleAMLDescription() {
+            const val = document.getElementById('aml').value;
+            document.getElementById('aml-desc-wrapper').style.display = (val === 'yes') ? 'block' : 'none';
+        }
 
-        function updateStates() {
-            const country = document.getElementById('country').value;
-            const stateInput = document.getElementById('state');
-            const stateList = document.getElementById('state-list');
-            const cityList = document.getElementById('city-list');
+        function toggleTradingAddress() {
+            const val = document.getElementById('trading-address-different').value;
+            document.getElementById('trading-address-wrapper').style.display = (val === 'yes') ? 'block' : 'none';
+        }
 
-            stateList.innerHTML = '';
-            cityList.innerHTML = '';
-            stateInput.value = '';
+        let dirCount = 0;
+        function addDirector() {
+            dirCount++;
+            const container = document.getElementById('directors-container');
+            const div = document.createElement('div');
+            div.className = 'repeat-block';
+            div.id = `dir-${dirCount}`;
+            div.innerHTML = `
+                <div class="repeat-block-title">Director ${dirCount}</div>
+                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+                <div class="field">
+                    <input type="text" placeholder=" " required data-dir="full_name">
+                    <label>Full Name *</label>
+                </div>
+                <div class="field">
+                    <input type="text" placeholder=" " required data-dir="role">
+                    <label>Role / Job Title *</label>
+                </div>
+            `;
+            container.appendChild(div);
+        }
 
-            if (statesData[country]) {
-                statesData[country].forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s;
-                    stateList.appendChild(opt);
-                });
-                stateInput.disabled = false;
-            } else {
-                stateInput.disabled = true;
-            }
-
-            if (citySuggestions[country]) {
-                citySuggestions[country].forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c;
-                    cityList.appendChild(opt);
-                });
-            }
+        let uboCount = 0;
+        function addUBO() {
+            uboCount++;
+            const container = document.getElementById('ubos-container');
+            const div = document.createElement('div');
+            div.className = 'repeat-block';
+            div.id = `ubo-${uboCount}`;
+            div.innerHTML = `
+                <div class="repeat-block-title">Beneficial Owner ${uboCount}</div>
+                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+                <div class="field">
+                    <input type="text" placeholder=" " required data-ubo="full_name">
+                    <label>Full Name *</label>
+                </div>
+                <div class="field">
+                    <input type="number" placeholder=" " required data-ubo="stake_percent">
+                    <label>Stake (%) *</label>
+                </div>
+            `;
+            container.appendChild(div);
         }
 
         document.getElementById('signup-form').onsubmit = async (e) => {
             e.preventDefault();
-            const form = e.target;
-            const btn = form.querySelector('button[type="submit"]');
-            const originalBtnText = btn.innerText;
-
-            btn.innerText = "PROCESSING...";
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerText = 'PROCESSING...';
             btn.disabled = true;
 
             const formData = new FormData();
 
-            // Map form IDs to backend fields
-            const fields = {
-                'fname': 'fname', 'lname': 'lname', 'email': 'email', 'company': 'company',
-                'address': 'address', 'country': 'country', 'state': 'state', 'city': 'city',
-                'zip': 'zip', 'phone': 'phone', 'lei': 'lei', 'entity-type': 'entity_type',
-                'product': 'product', 'reg-num': 'reg_num', 'ownership-type': 'ownership_type',
-                'business-activity': 'business_activity', 'source-of-funds': 'source_of_funds',
-                'expected-volume': 'expected_volume', 'countries-op': 'countries_op'
-            };
+            // Text fields
+            const ids = ['fname', 'lname', 'email', 'phone', 'company', 'dba-name', 'website', 'address', 'country', 'state', 'city', 'zip', 'lei', 'registration-number', 'ein-number', 'incorporation-date', 'entity-type', 'ownership-type', 'regulatory-status', 'regulatory-authority',
+                'product', 'countries-operation', 'tax-residency-country', 'sanctions', 'pep_declaration', 'aml', 'aml-program-description', 'business-activity', 'expected-volume', 'source-of-funds', 'source-of-wealth', 'trading-address-different', 'trading-address', 'correspondent-bank',
+                'bank-name', 'routing-number', 'account-number', 'mcc-code'];
 
-            for (const [id, name] of Object.entries(fields)) {
-                formData.append(name, document.getElementById(id).value);
-            }
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) formData.append(id.replace(/-/g, '_'), el.value);
+            });
 
-            // Radio buttons
-            formData.append('sanctions', form.querySelector('input[name="sanctions"]:checked').value);
-            formData.append('aml', form.querySelector('input[name="aml"]:checked').value);
+            formData.append('adverse_media_consent', document.getElementById('adverse-media-consent').checked ? 'yes' : 'no');
+
+            // JSON fields
+            const directors = Array.from(document.querySelectorAll('#directors-container .repeat-block')).map(block => {
+                const obj = {};
+                block.querySelectorAll('[data-dir]').forEach(el => obj[el.dataset.dir] = el.value);
+                return obj;
+            });
+            formData.append('directors', JSON.stringify(directors));
+
+            const ubos = Array.from(document.querySelectorAll('#ubos-container .repeat-block')).map(block => {
+                const obj = {};
+                block.querySelectorAll('[data-ubo]').forEach(el => obj[el.dataset.ubo] = el.value);
+                return obj;
+            });
+            formData.append('ubos', JSON.stringify(ubos));
 
             // Files
             formData.append('file_bod', document.getElementById('file-bod').files[0]);
             formData.append('file_financials', document.getElementById('file-financials').files[0]);
             formData.append('file_ownership', document.getElementById('file-ownership').files[0]);
 
-            try {
-                const response = await fetch('http://localhost:8000/signup', {
-                    method: 'POST',
-                    body: formData
-                });
+            const incFile = document.getElementById('file-incorporation').files[0];
+            if (incFile) formData.append('file_incorporation', incFile);
 
+            const bankFile = document.getElementById('file-bank-statement').files[0];
+            if (bankFile) formData.append('file_bank_statement', bankFile);
+
+            const einFile = document.getElementById('file-ein-cert').files[0];
+            if (einFile) formData.append('file_ein', einFile);
+
+            const uboIdFile = document.getElementById('file-ubo-id').files[0];
+            if (uboIdFile) formData.append('file_ubo_id', uboIdFile);
+
+            try {
+                const response = await fetch('http://localhost:8000/signup', { method: 'POST', body: formData });
                 if (response.ok) {
-                    const result = await response.json();
-                    showThankYou(result.tracking_id);
+                    const res = await response.json();
+                    showThankYou(res.tracking_id);
                 } else {
-                    const error = await response.json();
-                    alert("Submission failed: " + (error.detail || "Unknown error"));
-                    btn.innerText = originalBtnText;
+                    const err = await response.json();
+                    alert('Error: ' + (err.detail || 'Upload failed'));
+                    btn.innerText = 'SUBMIT APPLICATION';
                     btn.disabled = false;
                 }
             } catch (err) {
-                console.error("Error:", err);
-                alert("Communication error with server. Please ensure the backend is running.");
-                btn.innerText = originalBtnText;
+                alert('Connection error. Check if server is running.');
+                btn.innerText = 'SUBMIT APPLICATION';
                 btn.disabled = false;
             }
         };
 
-        function showThankYou(trackingId) {
+        function showThankYou(tid) {
             const card = document.getElementById('signup-card');
             gsap.to(card, {
-                opacity: 0, scale: 0.95, duration: 0.5, onComplete: () => {
+                opacity: 0, y: 20, duration: 0.3, onComplete: () => {
                     card.innerHTML = `
-                        <div style="text-align: center; padding: 40px 0;">
-                            <div class="brand-logo" style="margin-bottom: 40px;">KINETIX</div>
-                            <div style="font-size: 4rem; margin-bottom: 20px;">✅</div>
-                            <h2 class="step-title" style="font-size: 2.2rem; margin-bottom: 20px;">Thank You</h2>
-                            <p style="font-size: 1.1rem; color: var(--text); margin-bottom: 10px; line-height: 1.6;">
-                                Your institutional application has been successfully submitted.
-                            </p>
-                            <div style="margin-bottom: 30px;">
-                                <span style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Tracking ID:</span>
-                                <div style="font-size: 1.4rem; font-weight: 800; color: var(--primary); font-family: monospace; background: #f0f7f0; display: inline-block; padding: 8px 15px; border-radius: 4px; border: 1px dashed var(--primary); margin-top: 5px;">${trackingId}</div>
-                            </div>
-                            <div style="background: rgba(27, 94, 32, 0.05); border: 1px solid var(--primary); padding: 25px; border-radius: 12px; margin-bottom: 40px;">
-                                <p style="color: var(--primary); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">
-                                    Status: Verification In Progress
-                                </p>
-                                <p style="font-size: 0.9rem; color: var(--text-muted);">
-                                    Our Internal Operations team is currently vetting your entity details and compliance documentation. A confirmation email has been sent to your registered professional address.
-                                </p>
-                            </div>
-                            <a href="index.html" class="btn-auth btn-next" style="display: inline-block; text-decoration: none; width: auto; padding: 18px 40px;">Return to Hub</a>
-                        </div>
-                    `;
-                    gsap.fromTo(card, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: 0.8, ease: "back.out(1.7)" });
+                    <div style="text-align:center; padding: 40px 0;">
+                        <div class="brand-logo">KINETIX</div>
+                        <h2 style="color:var(--primary); font-size:1.8rem; margin: 20px 0;">Application Received</h2>
+                        <p style="color:var(--text); margin-bottom: 25px;">Your Tracking ID: <br><strong style="font-family:monospace; font-size:1.4rem;">${tid}</strong></p>
+                        <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.6;">Our compliance team will review your data within 48 hours. Check your email for next steps.</p>
+                        <a href="index.html" class="btn-auth btn-next" style="display:inline-block; margin-top:30px; text-decoration:none;">Back to Portal</a>
+                    </div>
+                `;
+                    gsap.to(card, { opacity: 1, y: 0, duration: 0.5 });
                 }
             });
         }
 
-        // Entrance animation
-        gsap.from('#signup-card', { opacity: 0, y: 50, duration: 1, ease: "expo.out" });
+        addDirector();
+
+        const MOCK_DATA = {
+            "2026": {
+                // Step 1
+                "fname": "John", "lname": "Doe", "email": "john.doe@evergreen-finance.com", "phone": "+1 212 555 1234",
+                "company": "Evergreen Financial Group", "dba_name": "Evergreen Private Wealth", "website": "https://evergreen-finance.com",
+                "address": "120 Wall Street, New York, NY 10005", "country": "United States", "state": "NY", "city": "New York", "zip": "10005",
+                "lei": "5493001KJY7UW9K12345", "registration_number": "NY-889900", "ein_number": "12-3456789", "incorporation_date": "2010-05-15",
+                "regulatory_status": "Regulated", "regulatory_authority": "SEC", "entity_type": "bank", "ownership_type": "Privately Held",
+                // Step 3
+                "product": "payments", "countries_operation": "US, UK, SG", "tax_residency_country": "United States",
+                "sanctions": "no", "pep_declaration": "no", "aml": "yes", "aml_program_description": "Comprehensive global AML program adhering to FATF recommendations and local FINRA requirements.",
+                "business_activity": "Investment Banking & Asset Management", "expected_volume": "$10M+", "source_of_funds": "Corporate Operating Revenues",
+                "source_of_wealth": "Shareholder capital injections and retained earnings from operations.", "trading_address_different": "no",
+                "correspondent_bank": "JPMorgan Chase Bank, N.A.",
+                // Step 4
+                "bank_name": "JPMorgan Chase", "routing_number": "021000021", "account_number": "9988776655", "mcc_code": "6011",
+                // Dynamic
+                "directors": [
+                    { "full_name": "Michael S. Evergreen", "role": "CEO & Chairman" },
+                    { "full_name": "Sarah Jenkins", "role": "Chief Compliance Officer" }
+                ],
+                "ubos": [
+                    { "full_name": "Evergreen Family Trust", "stake_percent": "65" },
+                    { "full_name": "Michael S. Evergreen", "stake_percent": "35" }
+                ]
+            },
+            "9999": {
+                // Step 1 - High Risk / Sanctions Scenario
+                "fname": "Wagner", "lname": "Admin", "email": "admin@wagner-shield.ru", "phone": "+7 495 123 4567",
+                "company": "Wagner Shield Corp", "dba_name": "Shield Security", "website": "http://wagner-shield.ru",
+                "address": "Molkino, Krasnodar Krai", "country": "Russia", "state": "Krasnodar", "city": "Krasnodar", "zip": "350000",
+                "lei": "5493062XWAGNER4455", "registration_number": "RU-WAG-1122", "ein_number": "RU-INV-990088", "incorporation_date": "2014-03-01",
+                "regulatory_status": "Unregulated", "entity_type": "corporate", "ownership_type": "Privately Held",
+                // Step 3
+                "product": "compliance", "countries_operation": "Russia, Syria, Libya", "tax_residency_country": "Russia",
+                "sanctions": "yes", "pep_declaration": "yes", "aml": "no",
+                "business_activity": "Private Security and Logistics", "expected_volume": "$10M+", "source_of_funds": "Government Contracts",
+                "source_of_wealth": "State-linked defense and security infrastructure funding.", "trading_address_different": "no",
+                // Step 4
+                "bank_name": "VTB Bank PJSC", "routing_number": "VTB-RU-MS", "account_number": "1122334455", "mcc_code": "7393",
+                "directors": [
+                    { "full_name": "Yevgeny Prigozhin", "role": "Strategic Advisor" }
+                ],
+                "ubos": [
+                    { "full_name": "Mikhail Fridman", "stake_percent": "100" }
+                ]
+            }
+        };
+
+        function checkMagicPIN(val) {
+            if (MOCK_DATA[val]) {
+                applyMagicFill(MOCK_DATA[val]);
+                document.getElementById('magic-pin').value = "****";
+                document.getElementById('magic-pin').blur();
+            }
+        }
+
+        function applyMagicFill(data) {
+            // Fill static fields
+            Object.keys(data).forEach(key => {
+                const id = key.replace(/_/g, '-');
+                const el = document.getElementById(id);
+                if (el && key !== 'directors' && key !== 'ubos') {
+                    el.value = data[key];
+                    // Trigger events for selects
+                    if (el.tagName === 'SELECT' && el.onchange) el.onchange();
+                }
+            });
+
+            // Handle Directors
+            const dContainer = document.getElementById('directors-container');
+            dContainer.innerHTML = ''; dirCount = 0;
+            data.directors.forEach(d => {
+                addDirector();
+                const block = dContainer.lastElementChild;
+                block.querySelector('[data-dir="full_name"]').value = d.full_name;
+                block.querySelector('[data-dir="role"]').value = d.role;
+            });
+
+            // Handle UBOs
+            const uContainer = document.getElementById('ubos-container');
+            uContainer.innerHTML = ''; uboCount = 0;
+            if (data.ubos) {
+                data.ubos.forEach(u => {
+                    addUBO();
+                    const block = uContainer.lastElementChild;
+                    block.querySelector('[data-ubo="full_name"]').value = u.full_name;
+                    block.querySelector('[data-ubo="stake_percent"]').value = u.stake_percent;
+                });
+            }
+
+            // Visual signal
+            gsap.fromTo('.form-step.active', { backgroundColor: '#f0fdf4' }, { backgroundColor: 'transparent', duration: 1.5 });
+
+            // Helpful notification
+            const hint = document.createElement('div');
+            hint.innerHTML = "✨ Magic Fill Applied!";
+            hint.style = "position:fixed; top:20px; right:20px; background:var(--primary); color:white; padding:12px 24px; border-radius:50px; font-weight:700; z-index:10001; box-shadow:0 10px 30px rgba(0,0,0,0.2);";
+            document.body.appendChild(hint);
+            gsap.from(hint, { y: -50, opacity: 0 });
+            gsap.to(hint, { y: 20, opacity: 0, delay: 2.5, onComplete: () => hint.remove() });
+        }
+
+        gsap.from('#signup-card', { opacity: 0, y: 30, duration: 0.8, ease: 'power2.out' });
     </script>
 </body>
 

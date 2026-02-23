@@ -1,24 +1,19 @@
 :root {
-    --bg: #FFFFFF;
-    --surface: #F8F9FA;
-    --primary: #1B5E20;
-    /* Deep Dark Green */
-    --accent: #2E7D32;
-    /* Slightly lighter accent green */
-    --text: #212529;
-    --text-muted: #6C757D;
-    --glass: rgba(255, 255, 255, 0.9);
-    --border: #DEE2E6;
-    --font-main: 'Inter', sans-serif;
-    --font-heading: 'Inter', sans-serif;
-    /* Corporate clean headers */
+    --bg: #f3f4f6;
+    --surface: #ffffff;
+    --primary: #064e3b;
+    --accent: #10b981;
+    --text: #111827;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --input-bg: #ffffff;
+    --font-main: 'Inter', system-ui, sans-serif;
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    cursor: none;
 }
 
 html {
@@ -40,17 +35,7 @@ body {
 }
 
 /* Noise and Mesh Effects */
-.noise-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: url('https://grainy-gradients.vercel.app/noise.svg');
-    opacity: 0.05;
-    pointer-events: none;
-    z-index: 9999;
-}
+
 
 .mesh-container {
     position: fixed;
@@ -60,8 +45,9 @@ body {
     height: 100%;
     overflow: hidden;
     z-index: -1;
-    opacity: 0.1;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: radial-gradient(circle at 0% 0%, #064e3b 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, #111827 0%, transparent 50%),
+        #030712;
 }
 
 .mesh-ball {

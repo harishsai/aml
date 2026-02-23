@@ -4,3 +4,5 @@ psycopg2-binary
 python-multipart
 pydantic
 python-dotenv
+boto3
+aws-lambda-powertools

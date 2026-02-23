@@ -265,9 +265,10 @@
             tag.style.color = 'var(--primary)';
         }
 
-        // Store logged-in email for password change
-        let loggedInEmail = '';
-        let loggedInPassword = '';
+        // Dynamically determine the backend URL
+        const API_BASE = (window.location.protocol === 'file:' || window.location.port !== '8000')
+            ? 'http://localhost:8000'
+            : window.location.origin;
 
         async function handleAuth(e) {
             e.preventDefault();
@@ -281,13 +282,20 @@
 
             try {
                 if (role === 'admin') {
-                    const response = await fetch('http://localhost:8000/admin/login', {
+                    const response = await fetch(`${API_BASE}/admin/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username: email, password: password })
                     });
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        alert("Login failed: " + (errData.detail || "Invalid Admin Credentials"));
+                        btnText.style.display = 'block'; loader.style.display = 'none';
+                        return;
+                    }
                     const data = await response.json();
                     if (data.status === 'success') {
+                        sessionStorage.setItem('admin_name', data.full_name || 'Admin');
                         window.location.href = 'admin.html';
                     } else {
                         alert("Invalid Admin Credentials");
@@ -295,7 +303,7 @@
                     }
                 } else {
                     // Participant login
-                    const response = await fetch('http://localhost:8000/auth/participant-login', {
+                    const response = await fetch(`${API_BASE}/auth/participant-login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username: email, password: password })
@@ -353,7 +361,7 @@
             btn.textContent = 'UPDATING...';
 
             try {
-                const response = await fetch('http://localhost:8000/auth/change-password', {
+                const response = await fetch(`${API_BASE}/auth/change-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

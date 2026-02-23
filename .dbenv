@@ -1,9 +1,10 @@
 # Database Configuration
-DB_HOST=pgs-test-db.cluster-ce5iuiycmlzd.us-east-1.rds.amazonaws.com
+DB_HOST=database-1.cluster-chonchr3dgsg.us-east-1.rds.amazonaws.com
 DB_PORT=5432
-DB_NAME=pgsdbtst
-DB_USER=client_onboarding
-DB_PASSWORD=We11d0ne
+DB_NAME=postgres
+DB_USER=db_master
+DB_PASSWORD=-3IB-EzqV*6]5i]J5unsHM?5a6D6
+DB_SSL_MODE=require
 
 # Session Initialization
 DB_INIT_COMMAND="SET SESSION CHARACTERISTICS AS TRANSACTION READ WRITE;"
@@ -14,3 +15,9 @@ SMTP_PORT=587
 SMTP_USER=a2dea0001@smtp-brevo.com
 SMTP_PASS=xsmtpsib-6abf481ba03940a9b230d603edbff4af233050ed796e84768ff4aee08fda58e5-pehU8FcGmJD6cOoh
 SMTP_SENDER=dbacloudora@gmail.com
+
+# AWS Configuration
+S3_BUCKET_NAME=kinetix-onboarding-docs-hp
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=AKIA3ONYJGLFY2BI7UXV
+AWS_SECRET_ACCESS_KEY=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

@@ -1,0 +1,21 @@
+aml-db.cluster-cre8ygw84naj.us-west-2.rds.amazonaws.com
+db_master
+
+
+psql "host=aml-db.cluster-cre8ygw84naj.us-west-2.rds.amazonaws.com port=5432 dbname=postgres user=db_master sslmode=require"
+
+B_4d(KfAjaSxgch]*1[SLu5~RxSo
+
+
+\i security_setup.sql
+\i tables.sql
+\i sanctions_data.sql
+\i aml_mock_data.sql
+\i verification_data.sql
+\i aml_migration.sql
+\i industry_standard_upgrade.sql
+
+
+aws sso login --profile hackathon-participant-537998868531
+
+python refresh_sso_creds.py

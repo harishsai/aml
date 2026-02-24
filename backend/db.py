@@ -18,8 +18,8 @@ DB_SSL_MODE = os.getenv("DB_SSL_MODE", "prefer")
 DB_INIT_COMMAND = os.getenv("DB_INIT_COMMAND", "SET SESSION CHARACTERISTICS AS TRANSACTION READ WRITE;")
 
 # AWS Configuration
-S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "kinetix-onboarding-docs-hp")
-AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "kinetix-onboarding-docs")
+AWS_REGION = os.getenv("AWS_REGION", "us-west-2")
 
 # Connection pool
 try:

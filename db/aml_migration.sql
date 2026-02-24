@@ -74,6 +74,7 @@ ALTER TABLE client_onboarding.onboarding_details
     ADD COLUMN IF NOT EXISTS correspondent_bank VARCHAR(200),
     ADD COLUMN IF NOT EXISTS aml_program_description TEXT,
     ADD COLUMN IF NOT EXISTS incorporation_doc_content BYTEA,
+    ADD COLUMN IF NOT EXISTS website VARCHAR(255),
     ADD COLUMN IF NOT EXISTS ai_risk_level VARCHAR(20);
 
 -- Additional useful indexes

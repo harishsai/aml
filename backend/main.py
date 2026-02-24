@@ -34,8 +34,14 @@ class ActionRequest(BaseModel):
     remarks: str = None
 
 # S3 Client Configuration
-S3_BUCKET = os.getenv("S3_BUCKET_NAME", "kinetix-onboarding-docs-hp")
-s3_client = boto3.client('s3', region_name=os.getenv("AWS_REGION", "us-east-1"))
+S3_BUCKET = os.getenv("S3_BUCKET_NAME", "kinetix-onboarding-docs")
+s3_client = boto3.client(
+    's3', 
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    aws_session_token=os.getenv("AWS_SESSION_TOKEN"),
+    region_name=os.getenv("AWS_REGION", "us-west-2")
+)
 
 def upload_to_s3(file_obj, onboarding_id, filename):
     """Uploads a file to S3 and returns the S3 URI."""
@@ -516,6 +522,7 @@ async def get_ticket_doc(id: str, doc_type: str):
             path_parts = s3_uri.replace("s3://", "").split("/", 1)
             bucket = path_parts[0]
             key = path_parts[1]
+            # Use explicit client for fetching
             obj = s3_client.get_object(Bucket=bucket, Key=key)
             return Response(content=obj['Body'].read(), media_type="application/pdf")
         except Exception as e:

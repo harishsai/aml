@@ -117,6 +117,7 @@ CREATE TABLE client_onboarding.onboarding_details (
 
     -- 2g: AI agent output
     ai_risk_level VARCHAR(20),          -- CLEARED | FLAGGED | HIGH_RISK | CRITICAL (set by AML agent)
+    website VARCHAR(255),               -- Entity public website
 
     -- Metadata
     submitted_at TIMESTAMP WITH TIME ZONE,

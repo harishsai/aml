@@ -117,7 +117,7 @@ async function loadTicket(id) {
     detailContainer.innerHTML = '<div style="padding:80px;text-align:center;color:var(--dash-text-muted);">Loading...</div>';
 
     try {
-        const res = await fetch(`http://localhost:8000/admin/tickets/${id}`);
+        const res = await fetch(`${API_BASE}/admin/tickets/${id}`);
         const data = await res.json();
         const t = data.ticket;
         renderTicketDetail(t);
@@ -379,7 +379,7 @@ async function runKycAgent(ticketId) {
     btn.disabled = true;
     btn.innerText = '⏳ Running KYC...';
     try {
-        await fetch(`http://localhost:8000/admin/tickets/${ticketId}/run-kyc`, { method: 'POST' });
+        await fetch(`${API_BASE}/admin/tickets/${ticketId}/run-kyc`, { method: 'POST' });
         setTimeout(async () => {
             await fetchTickets();
             await loadTicket(ticketId);
@@ -468,10 +468,9 @@ function renderAgentEvidence(log) {
         `;
     }
 
-    if (log.output?.decision_logic || log.output?.rationale || log.ai_summary) {
-        const logic = log.output?.decision_logic || log.output?.rationale || log.ai_summary;
+    if (log.output?.decision_logic || log.output?.rationale || log.ai_summary || log.output?.audit_trail) {
         html += `
-            <button onclick='showEvidenceModal(${JSON.stringify(logic).replace(/'/g, "&apos;")})' 
+            <button onclick='showEvidenceModal(${JSON.stringify(log).replace(/'/g, "&apos;")})' 
                     style="margin-top:10px; background:rgba(0, 255, 163, 0.05); border:1px solid rgba(0, 255, 163, 0.2); color:var(--dash-accent); padding:4px 10px; border-radius:4px; font-size:0.65rem; cursor:pointer; font-weight:bold; transition:all 0.2s; width:100%; text-align:center;">
                 🔎 VIEW DECISION LOG & EVIDENCE
             </button>
@@ -482,31 +481,79 @@ function renderAgentEvidence(log) {
     return html;
 }
 
-window.showEvidenceModal = function (logicText) {
+window.showEvidenceModal = function (log) {
+    const isObject = typeof log === 'object';
+    const logicText = isObject ? (log.output?.decision_logic || log.output?.rationale || log.ai_summary) : log;
+    const auditTrail = isObject ? log.output?.audit_trail : null;
+
     let modal = document.getElementById('evidence-modal');
     if (!modal) {
         modal = document.createElement('div');
         modal.id = 'evidence-modal';
-        modal.innerHTML = `
-            <div id="evidence-modal-backdrop" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:9999; display:flex; align-items:center; justify-content:center;">
-                <div style="background:var(--dash-bg); border:1px solid rgba(255,167,38,0.3); border-radius:12px; width:90%; max-width:600px; padding:30px; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.5);">
-                    <div style="font-size:1.2rem; font-weight:bold; color:var(--dash-accent); margin-bottom:15px; display:flex; align-items:center; gap:10px;">
-                        <span>🧠</span> AI Decision Evidence
-                    </div>
-                    <div id="evidence-content" style="font-size:0.9rem; line-height:1.6; color:var(--dash-text-muted); max-height:400px; overflow-y:auto; padding-right:10px; border-left:3px solid var(--dash-accent); padding-left:15px; background:rgba(255,255,255,0.02); border-radius:0 8px 8px 0;"></div>
-                    <button onclick="document.getElementById('evidence-modal').remove()" 
-                            style="margin-top:25px; width:100%; background:var(--dash-accent); border:none; color:black; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; text-transform:uppercase; letter-spacing:1px;">
-                        Close Evidence Log
-                    </button>
-                    <div style="margin-top:10px; font-size:0.7rem; color:var(--dash-text-muted); text-align:center;">
-                        This log is generated automatically by the Amazon Bedrock KYC Agent.
-                    </div>
-                </div>
-            </div>
-        `;
         document.body.appendChild(modal);
     }
-    document.getElementById('evidence-content').innerText = logicText;
+
+    let auditHtml = '';
+    if (auditTrail && Array.isArray(auditTrail) && auditTrail.length > 0) {
+        auditHtml = `
+            <div style="margin-bottom:20px;">
+                <div style="font-size:0.75rem; color:var(--dash-accent); font-weight:bold; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid rgba(0,255,163,0.2); padding-bottom:5px;">
+                    🛡 Verification Summary Table
+                </div>
+                <table style="width:100%; border-collapse:collapse; font-size:0.8rem; background:rgba(255,255,255,0.02); border-radius:8px; overflow:hidden;">
+                    <thead style="background:rgba(0,0,0,0.3);">
+                        <tr>
+                            <th style="padding:10px; text-align:left; color:var(--dash-text-muted);">Check Point</th>
+                            <th style="padding:10px; text-align:left; color:var(--dash-text-muted);">Form Value</th>
+                            <th style="padding:10px; text-align:left; color:var(--dash-text-muted);">OCR / Agent Found</th>
+                            <th style="padding:10px; text-align:center; color:var(--dash-text-muted);">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${auditTrail.map(step => `
+                            <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <td style="padding:10px; font-weight:bold; color:var(--dash-text);">${step.label}</td>
+                                <td style="padding:10px; color:var(--dash-text-muted);">${step.form_value || '—'}</td>
+                                <td style="padding:10px; color:var(--dash-text); font-family:monospace;">${step.ocr_value || '—'}</td>
+                                <td style="padding:10px; text-align:center;">
+                                    <span style="padding:2px 6px; border-radius:4px; font-weight:bold; font-size:0.65rem; 
+                                        color:${step.status === 'MATCH' ? '#4ade80' : step.status === 'PARTIAL' ? '#fbbf24' : '#f87171'};
+                                        background:${step.status === 'MATCH' ? 'rgba(74,222,128,0.1)' : step.status === 'PARTIAL' ? 'rgba(251,191,36,0.1)' : 'rgba(248,113,113,0.1)'};">
+                                        ${step.status}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    modal.innerHTML = `
+        <div id="evidence-modal-backdrop" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:9999; display:flex; align-items:center; justify-content:center;">
+            <div style="background:var(--dash-bg); border:1px solid rgba(0,255,163,0.2); border-radius:12px; width:95%; max-width:800px; padding:30px; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.5); overflow-y:auto; max-height:90vh;">
+                <div style="font-size:1.2rem; font-weight:bold; color:var(--dash-accent); margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+                    <span>🛡</span> AI Audit Intelligence Report
+                </div>
+                
+                ${auditHtml}
+
+                <div style="font-size:0.75rem; color:var(--dash-accent); font-weight:bold; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid rgba(0,255,163,0.2); padding-bottom:5px;">
+                    🧠 Detailed Agent Reasoning
+                </div>
+                <div id="evidence-content" style="font-size:0.9rem; line-height:1.6; color:var(--dash-text-muted); padding-right:10px; border-left:3px solid var(--dash-accent); padding-left:15px; background:rgba(255,255,255,0.02); border-radius:0 8px 8px 0; white-space:pre-wrap;">${logicText || 'No detailed reasoning available.'}</div>
+                
+                <button onclick="document.getElementById('evidence-modal').remove()" 
+                        style="margin-top:25px; width:100%; background:var(--dash-accent); border:none; color:black; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; text-transform:uppercase; letter-spacing:1px;">
+                    Close Audit Report
+                </button>
+                <div style="margin-top:10px; font-size:0.7rem; color:var(--dash-text-muted); text-align:center;">
+                    This comprehensive audit trail is generated in real-time by Amazon Bedrock agents.
+                </div>
+            </div>
+        </div>
+    `;
 };
 
 async function fetchAgentLogs(ticketId) {

@@ -113,22 +113,53 @@ async function loadTicket(id) {
     activeTicketId = id;
     document.querySelectorAll('.ticket-card').forEach(c => c.classList.toggle('active', c.dataset.id === id));
 
-    const detailContainer = document.getElementById('ticket-detail-container');
-    detailContainer.innerHTML = '<div style="padding:80px;text-align:center;color:var(--dash-text-muted);">Loading...</div>';
-
+    // Show loading state if we want, but usually better to just open modal
     try {
         const res = await fetch(`${API_BASE}/admin/tickets/${id}`);
         const data = await res.json();
         const t = data.ticket;
-        renderTicketDetail(t);
+        openTicketModal(t);
 
         // Start polling if ticket is in progress
         if (['PENDING_REVIEW', 'AML_IN_PROGRESS', 'KYC_COMPLETE'].includes(t.status)) {
             startLogPolling(id);
         }
     } catch (err) {
-        detailContainer.innerHTML = `<div style="padding:40px;color:#ef4444;">Failed to load ticket: ${err.message}</div>`;
+        alert("Failed to load ticket details.");
     }
+}
+
+function openTicketModal(t) {
+    let modal = document.getElementById('ticket-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ticket-modal';
+        document.body.appendChild(modal);
+    }
+    modal.className = 'ticket-modal-backdrop';
+    modal.style.display = 'flex';
+
+    // Disable body scroll completely
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+    document.body.style.height = '100vh';
+
+    renderTicketDetail(t);
+}
+
+function closeTicketModal() {
+    activeTicketId = null;
+    if (logPollingInterval) clearInterval(logPollingInterval);
+
+    const modal = document.getElementById('ticket-modal');
+    if (modal) modal.style.display = 'none';
+
+    // Enable body scroll
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.height = '';
+
+    document.querySelectorAll('.ticket-card').forEach(c => c.classList.remove('active'));
 }
 
 function startLogPolling(id) {
@@ -145,7 +176,9 @@ function startLogPolling(id) {
         const data = await res.json();
         if (data.ticket.status !== 'PENDING_REVIEW' && data.ticket.status !== 'AML_IN_PROGRESS') {
             // Status changed! Refresh full detail once to show buttons
-            renderTicketDetail(data.ticket);
+            if (activeTicketId === id) {
+                renderTicketDetail(data.ticket);
+            }
             clearInterval(logPollingInterval);
         }
     }, 5000);
@@ -153,7 +186,8 @@ function startLogPolling(id) {
 
 function renderTicketDetail(t) {
     const aml = t.aml_questions || {};
-    const container = document.getElementById('ticket-detail-container');
+    const modal = document.getElementById('ticket-modal');
+    if (!modal) return;
 
     // Parse dates
     const submittedDate = t.submitted_at ? new Date(t.submitted_at).toLocaleString() : 'N/A';
@@ -181,7 +215,7 @@ function renderTicketDetail(t) {
                 <td>${u.tax_id || '—'}</td>
                 <td><span style="color:${u.is_pep ? '#ef4444' : '#22c55e'}">${u.is_pep ? '⚠ YES' : 'No'}</span></td>
             </tr>`).join('')
-        : '<tr><td colspan="6" style="color:var(--dash-text-muted);font-style:italic;text-align:center;">No UBOs declared</td></tr>';
+        : '<tr><td colspan="7" style="color:var(--dash-text-muted);font-style:italic;text-align:center;">No UBOs declared</td></tr>';
 
     // Audit history
     const histHtml = (t.history && t.history.length)
@@ -197,136 +231,152 @@ function renderTicketDetail(t) {
         `).join('')
         : '<div style="color:var(--dash-text-muted);font-size:0.82rem;">No audit history.</div>';
 
-    container.innerHTML = `
-        <div class="ticket-detail-inner">
-            <!-- Header -->
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px;">
+    modal.innerHTML = `
+        <div class="ticket-modal-content">
+            <div class="ticket-modal-header">
                 <div>
-                    <div style="font-size:0.7rem;color:var(--dash-text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">${t.tracking_id || 'ID N/A'}</div>
-                    <h2 style="font-size:1.5rem;font-weight:800;color:var(--dash-text);margin:0;">${t.company_name || 'N/A'}</h2>
-                    <div style="margin-top:6px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
-                        <span class="status-badge ${getStatusClass(t.status)}">${t.status.replace(/_/g, ' ')}</span>
-                        ${getRiskBadge(t.ai_risk_level)}
-                        <span style="font-size:0.75rem;color:var(--dash-text-muted);">Submitted ${submittedDate}</span>
+                    <span style="font-family:'JetBrains Mono'; font-size:0.75rem; color:var(--dash-text-muted);">${t.tracking_id || 'ID N/A'}</span>
+                    <h3 style="margin:0; font-size:1.2rem;">${t.company_name}</h3>
+                </div>
+                <button class="close-modal-btn" onclick="closeTicketModal()">✕</button>
+            </div>
+            
+            <div class="ticket-modal-body">
+                <div class="ticket-detail-inner">
+                    <!-- Top Action Summary -->
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; background:white; padding:20px; border-radius:12px; border:1px solid var(--dash-border); box-shadow:var(--shadow-sm);">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                                <span class="status-badge ${getStatusClass(t.status)}">${t.status.replace(/_/g, ' ')}</span>
+                                ${getRiskBadge(t.ai_risk_level)}
+                            </div>
+                            <div style="font-size:0.82rem; color:var(--dash-text-muted);">
+                                ${t.country || ''} · ${t.entity_type || ''} · Submitted ${submittedDate}
+                            </div>
+                        </div>
+                        <div class="action-btns" style="display:flex; gap:8px;">
+                            ${renderActionButtons(t)}
+                        </div>
+                    </div>
+
+                    <!-- AI Agent Logs -->
+                    <div class="detail-section" style="background: rgba(0, 255, 163, 0.03); border: 1px solid rgba(0, 255, 163, 0.1);">
+                        <div class="detail-section-title" style="color: var(--dash-accent);">🤖 AI Screening Intelligence</div>
+                        <div id="agent-logs-container" style="font-size:0.82rem;">
+                            <div style="color:var(--dash-text-muted);">Syncing AI audit logs...</div>
+                        </div>
+                    </div>
+
+                    <!-- Entity Identity -->
+                    <div class="detail-section">
+                        <div class="detail-section-title">Entity Identity</div>
+                        <div class="detail-grid">
+                            <div class="detail-item"><span class="d-label">Legal Entity</span><span class="d-value">${t.company_name || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Entity Type</span><span class="d-value">${t.entity_type || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">LEI</span><span class="d-value" style="font-family:monospace;">${t.lei_identifier || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Registration No.</span><span class="d-value">${t.registration_number || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">EIN / Tax ID</span><span class="d-value">${t.ein_number || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">DBA Name</span><span class="d-value">${t.dba_name || 'None'}</span></div>
+                            <div class="detail-item"><span class="d-label">Incorporation Date</span><span class="d-value">${t.incorporation_date || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Ownership Type</span><span class="d-value">${t.ownership_type || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Regulatory Status</span><span class="d-value">${t.regulatory_status || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Regulatory Authority</span><span class="d-value">${t.regulatory_authority || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Email</span><span class="d-value">${t.email || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Phone</span><span class="d-value">${t.phone_number || '—'}</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="detail-section">
+                        <div class="detail-section-title">Address & Presence</div>
+                        <div class="detail-grid">
+                            <div class="detail-item" style="grid-column: span 2;"><span class="d-label">Registered Address</span><span class="d-value">${t.company_address || '—'}, ${t.city || ''}, ${t.state || ''}, ${t.country || ''} ${t.zip_code || ''}</span></div>
+                            <div class="detail-item" style="grid-column: span 2;"><span class="d-label">Trading Address</span><span class="d-value">${t.trading_address || 'Same as registered'}</span></div>
+                            <div class="detail-item"><span class="d-label">Tax Residency</span><span class="d-value">${t.tax_residency_country || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Company Website</span><span class="d-value">${t.website ? `<a href="${t.website.startsWith('http') ? t.website : 'https://' + t.website}" target="_blank" style="color:var(--dash-accent);">${t.website}</a>` : '—'}</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Ownership & Control -->
+                    <div class="detail-section">
+                        <div class="detail-section-title">Ownership & Control</div>
+                        <div style="margin-bottom:24px;">
+                            <h4 style="font-size:0.7rem; color:var(--dash-text-muted); margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;">Directors (${(t.directors || []).length})</h4>
+                            <div style="overflow-x:auto;">
+                                <table class="detail-table">
+                                    <thead><tr><th>Name</th><th>Role</th><th>Nationality</th><th>Country of Residence</th></tr></thead>
+                                    <tbody>${directorsHtml}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="font-size:0.7rem; color:var(--dash-text-muted); margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;">Ultimate Beneficial Owners (${(t.ubos || []).length})</h4>
+                            <div style="overflow-x:auto;">
+                                <table class="detail-table">
+                                    <thead><tr><th>Name</th><th>Stake %</th><th>Nationality</th><th>Country of Res.</th><th>DOB</th><th>ID/Tax ID</th><th>PEP</th></tr></thead>
+                                    <tbody>${ubosHtml}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settlement -->
+                    <div class="detail-section">
+                        <div class="detail-section-title">Settlement & Bank Details</div>
+                        <div class="detail-grid">
+                            <div class="detail-item"><span class="d-label">Recipient Bank</span><span class="d-value">${t.bank_name || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Routing / SWIFT</span><span class="d-value" style="font-family:monospace;">${t.routing_number || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Account Number</span><span class="d-value" style="font-family:monospace;">${t.account_number || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Risk Category (MCC)</span><span class="d-value"><span style="background:rgba(0,0,0,0.05);padding:2px 6px;border-radius:4px;">${t.mcc_code || '—'}</span></span></div>
+                        </div>
+                    </div>
+
+                    <!-- AML Profile -->
+                    <div class="detail-section">
+                        <div class="detail-section-title">AML Profile</div>
+                        <div class="detail-grid">
+                            <div class="detail-item"><span class="d-label">Business Activity</span><span class="d-value">${t.business_activity || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Source of Funds</span><span class="d-value">${t.source_of_funds || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Source of Wealth</span><span class="d-value">${t.source_of_wealth || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Expected Monthly Volume</span><span class="d-value">${t.expected_volume || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Countries of Operation</span><span class="d-value">${t.countries_operation || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Sanctions Exposure</span><span class="d-value">${aml.sanctions_exposure || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">PEP Declaration</span><span class="d-value" style="color:${t.pep_declaration ? '#ef4444' : '#22c55e'}">${t.pep_declaration ? '⚠ YES — PEP Declared' : 'No'}</span></div>
+                            <div class="detail-item"><span class="d-label">AML Program</span><span class="d-value">${aml.aml_program_confirmed === 'yes' ? '✔ Confirmed' : '✗ Not Confirmed'}</span></div>
+                            <div class="detail-item"><span class="d-label">AML Description</span><span class="d-value">${t.aml_program_description || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Correspondent Bank</span><span class="d-value">${t.correspondent_bank || '—'}</span></div>
+                            <div class="detail-item"><span class="d-label">Adverse Media Consent</span><span class="d-value">${t.adverse_media_consent ? '✔ Consented' : '✗ Not Consented'}</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="detail-section">
+                        <div class="detail-section-title">Documents</div>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                            <a href="${API_BASE}/admin/tickets/${t.id}/docs/incorporation" target="_blank" class="doc-link">📋 Incorporation</a>
+                            <a href="${API_BASE}/admin/tickets/${t.id}/docs/bod" target="_blank" class="doc-link">📄 Board of Directors</a>
+                            <a href="${API_BASE}/admin/tickets/${t.id}/docs/financials" target="_blank" class="doc-link">📊 Financials</a>
+                            <a href="${API_BASE}/admin/tickets/${t.id}/docs/ownership" target="_blank" class="doc-link">🏢 Ownership Structure</a>
+                            <a href="${API_BASE}/admin/tickets/${t.id}/docs/bank" target="_blank" class="doc-link">🏦 Bank Statement</a>
+                            <a href="${API_BASE}/admin/tickets/${t.id}/docs/ein" target="_blank" class="doc-link">🪪 EIN Certificate</a>
+                            <a href="${API_BASE}/admin/tickets/${t.id}/docs/ubo_id" target="_blank" class="doc-link">🆔 UBO ID</a>
+                        </div>
+                    </div>
+
+                    <!-- Audit Trail -->
+                    <div class="detail-section">
+                        <div class="detail-section-title">Audit Trail</div>
+                        <div class="audit-timeline">${histHtml}</div>
                     </div>
                 </div>
-                <div class="action-btns" style="display:flex;gap:8px;flex-wrap:wrap;">
-                    ${renderActionButtons(t)}
-                </div>
             </div>
 
-            <!-- AI Agent Logs (PROMOTED TO TOP) -->
-            <div class="detail-section" style="background: rgba(0, 255, 163, 0.03); padding: 15px; border-radius: 8px; border: 1px solid rgba(0, 255, 163, 0.1); margin-bottom: 24px;">
-                <div class="detail-section-title" style="color: var(--dash-accent); border-color: rgba(0, 255, 163, 0.2);">🤖 AI Screening Intelligence</div>
-                <div id="agent-logs-container" style="font-size:0.82rem;">
-                    <div style="color:var(--dash-text-muted);">Syncing AI audit logs...</div>
-                </div>
-            </div>
-
-            <!-- Entity Identity -->
-            <div class="detail-section">
-                <div class="detail-section-title">Entity Identity</div>
-                <div class="detail-grid">
-                    <div class="detail-item"><span class="d-label">Legal Entity</span><span class="d-value">${t.company_name || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Entity Type</span><span class="d-value">${t.entity_type || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">LEI</span><span class="d-value" style="font-family:monospace;">${t.lei_identifier || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Registration No.</span><span class="d-value">${t.registration_number || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">EIN / Tax ID</span><span class="d-value">${t.ein_number || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">DBA Name</span><span class="d-value">${t.dba_name || 'None'}</span></div>
-                    <div class="detail-item"><span class="d-label">Incorporation Date</span><span class="d-value">${t.incorporation_date || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Ownership Type</span><span class="d-value">${t.ownership_type || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Regulatory Status</span><span class="d-value">${t.regulatory_status || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Regulatory Authority</span><span class="d-value">${t.regulatory_authority || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Email</span><span class="d-value">${t.email || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Phone</span><span class="d-value">${t.phone_number || '—'}</span></div>
-                </div>
-            </div>
-
-            <!-- Address -->
-            <div class="detail-section">
-                <div class="detail-section-title">Address</div>
-                <div class="detail-grid">
-                    <div class="detail-item"><span class="d-label">Registered Address</span><span class="d-value">${t.company_address || '—'}, ${t.city || ''}, ${t.state || ''}, ${t.country || ''} ${t.zip_code || ''}</span></div>
-                    <div class="detail-item"><span class="d-label">Trading Address</span><span class="d-value">${t.trading_address || 'Same as registered'}</span></div>
-                    <div class="detail-item"><span class="d-label">Tax Residency</span><span class="d-value">${t.tax_residency_country || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Company Website</span><span class="d-value">${t.website ? `<a href="${t.website.startsWith('http') ? t.website : 'https://' + t.website}" target="_blank" style="color:var(--dash-accent);">${t.website}</a>` : '—'}</span></div>
-                </div>
-            </div>
-
-            <!-- Directors -->
-            <div class="detail-section">
-                <div class="detail-section-title">Directors (${(t.directors || []).length})</div>
-                <div style="overflow-x:auto;">
-                    <table class="detail-table">
-                        <thead><tr><th>Name</th><th>Role</th><th>Nationality</th><th>Country of Residence</th></tr></thead>
-                        <tbody>${directorsHtml}</tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- UBOs -->
-            <div class="detail-section">
-                <div class="detail-section-title">Ultimate Beneficial Owners (${(t.ubos || []).length})</div>
-                <div style="overflow-x:auto;">
-                    <table class="detail-table">
-                        <thead><tr><th>Name</th><th>Stake %</th><th>Nationality</th><th>Country of Residence</th><th>DOB</th><th>ID/Tax ID</th><th>PEP</th></tr></thead>
-                        <tbody>${ubosHtml}</tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Settlement Details -->
-            <div class="detail-section">
-                <div class="detail-section-title">Settlement & Bank Details</div>
-                <div class="detail-grid">
-                    <div class="detail-item"><span class="d-label">Recipient Bank</span><span class="d-value">${t.bank_name || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Routing / SWIFT</span><span class="d-value" style="font-family:monospace;">${t.routing_number || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Account Number</span><span class="d-value" style="font-family:monospace;">${t.account_number || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Risk Category (MCC)</span><span class="d-value"><span style="background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:4px;">${t.mcc_code || '—'}</span></span></div>
-                </div>
-            </div>
-
-            <!-- AML Profile -->
-            <div class="detail-section">
-                <div class="detail-section-title">AML Profile</div>
-                <div class="detail-grid">
-                    <div class="detail-item"><span class="d-label">Business Activity</span><span class="d-value">${t.business_activity || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Source of Funds</span><span class="d-value">${t.source_of_funds || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Source of Wealth</span><span class="d-value">${t.source_of_wealth || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Expected Monthly Volume</span><span class="d-value">${t.expected_volume || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Countries of Operation</span><span class="d-value">${t.countries_operation || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Sanctions Exposure</span><span class="d-value">${aml.sanctions_exposure || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">PEP Declaration</span><span class="d-value" style="color:${t.pep_declaration ? '#ef4444' : '#22c55e'}">${t.pep_declaration ? '⚠ YES — PEP Declared' : 'No'}</span></div>
-                    <div class="detail-item"><span class="d-label">AML Program</span><span class="d-value">${aml.aml_program_confirmed === 'yes' ? '✔ Confirmed' : '✗ Not Confirmed'}</span></div>
-                    <div class="detail-item"><span class="d-label">AML Program Description</span><span class="d-value">${t.aml_program_description || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Correspondent Bank</span><span class="d-value">${t.correspondent_bank || '—'}</span></div>
-                    <div class="detail-item"><span class="d-label">Adverse Media Consent</span><span class="d-value">${t.adverse_media_consent ? '✔ Consented' : '✗ Not Consented'}</span></div>
-                </div>
-            </div>
-
-            <!-- Documents -->
-            <div class="detail-section">
-                <div class="detail-section-title">Documents</div>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <a href="${API_BASE}/admin/tickets/${t.id}/docs/bod" target="_blank" class="doc-link">📄 Board of Directors</a>
-                    <a href="${API_BASE}/admin/tickets/${t.id}/docs/financials" target="_blank" class="doc-link">📊 Financials</a>
-                    <a href="${API_BASE}/admin/tickets/${t.id}/docs/ownership" target="_blank" class="doc-link">🏢 Ownership Structure</a>
-                    <a href="${API_BASE}/admin/tickets/${t.id}/docs/incorporation" target="_blank" class="doc-link">📋 Certificate of Incorporation</a>
-                    <a href="${API_BASE}/admin/tickets/${t.id}/docs/bank" target="_blank" class="doc-link">🏦 Bank Statement</a>
-                    <a href="${API_BASE}/admin/tickets/${t.id}/docs/ein" target="_blank" class="doc-link">🪪 EIN Certificate</a>
-                    <a href="${API_BASE}/admin/tickets/${t.id}/docs/ubo_id" target="_blank" class="doc-link">🆔 UBO ID</a>
-                </div>
-            </div>
-
-            <!-- Audit Trail -->
-            <div class="detail-section">
-                <div class="detail-section-title">Audit Trail</div>
-                <div class="audit-timeline">${histHtml}</div>
+            <div class="ticket-modal-footer">
+                <button class="dash-btn" onclick="closeTicketModal()" style="min-width:200px; background:var(--dash-primary); color:white; border:none; padding:12px;">CLOSE</button>
             </div>
         </div>
     `;
 
-    // Fetch agent logs async
     fetchAgentLogs(t.id);
 }
 
@@ -404,74 +454,14 @@ function agentRiskBadge(risk) {
 }
 
 function renderAgentEvidence(log) {
-    if (!log.output && !log.input_context) return '';
+    if (!log.output && !log.ai_summary) return '';
 
-    let html = '<div style="margin-top:8px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; border-left: 3px solid var(--dash-accent);">';
+    let html = '<div style="margin-top:8px;">';
 
-    if (log.check_name === 'ocr_extraction') {
-        const form = log.input_context?.form_data || {};
-        const ai = log.output || {};
-
-        // Use fallbacks if form_data is missing (older logs)
-        const submittedName = form.company_name || '—';
-        const submittedReg = form.registration_number || '—';
-
-        html += `
-            <div style="font-size:0.7rem; color:var(--dash-accent); margin-bottom:6px; font-weight:bold; text-transform:uppercase; letter-spacing:0.05em;">AI Comparison Evidence</div>
-            <table style="width:100%; font-size:0.75rem; border-collapse:collapse;">
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <th style="text-align:left; padding:4px; color:var(--dash-text-muted);">Detail</th>
-                    <th style="text-align:left; padding:4px; color:var(--dash-text-muted);">Form Value</th>
-                    <th style="text-align:left; padding:4px; color:var(--dash-text-muted);">AI Extracted</th>
-                </tr>
-                <tr>
-                    <td style="padding:4px; color:var(--dash-text-muted);">Legal Name</td>
-                    <td style="padding:4px;">${submittedName}</td>
-                    <td style="padding:4px; font-weight:bold; color:${submittedName !== ai.extracted_name && submittedName !== '—' ? '#f87171' : '#4ade80'}">${ai.extracted_name || '—'}</td>
-                </tr>
-                <tr>
-                    <td style="padding:4px; color:var(--dash-text-muted);">Reg Number</td>
-                    <td style="padding:4px;">${submittedReg}</td>
-                    <td style="padding:4px; font-weight:bold; color:${submittedReg !== ai.reg_number && submittedReg !== '—' ? '#f87171' : '#4ade80'}">${ai.reg_number || '—'}</td>
-                </tr>
-            </table>
-            <div style="margin-top:6px; font-size:0.7rem; color:var(--dash-text-muted);">Confidence Score: <span style="color:var(--dash-accent); font-weight:bold;">${ai.consistency_score || 0}%</span> ${log.input_context?.form_data ? '' : '<span style="font-style:italic; font-size:0.6rem;">(Historical context restricted)</span>'}</div>
-        `;
-    } else if (log.check_name === 'lei_verify' || log.check_name === 'entity_verification') {
-        const lei = log.output?.lei_row || {};
-        const input = log.input_context || {};
-        html += `
-            <div style="font-size:0.7rem; color:var(--dash-accent); margin-bottom:6px; font-weight:bold; text-transform:uppercase;">Registry Comparison</div>
-            <table style="width:100%; font-size:0.75rem; border-collapse:collapse;">
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <th style="text-align:left; padding:4px; color:var(--dash-text-muted);">Field</th>
-                    <th style="text-align:left; padding:4px; color:var(--dash-text-muted);">Submitted</th>
-                    <th style="text-align:left; padding:4px; color:var(--dash-text-muted);">Registry</th>
-                </tr>
-                <tr>
-                    <td style="padding:4px; color:var(--dash-text-muted);">Legal Name</td>
-                    <td style="padding:4px;">${input.company_name || '—'}</td>
-                    <td style="padding:4px; font-weight:bold; color:${!log.output?.name_match ? '#f87171' : '#4ade80'}">${lei.legal_name || '—'}</td>
-                </tr>
-            </table>
-        `;
-    } else if (log.output?.hits?.length > 0) {
-        html += `
-            <div style="font-size:0.7rem; color:#f87171; margin-bottom:6px; font-weight:bold; text-transform:uppercase;">Identified Matches</div>
-            ${log.output.hits.map(h => `
-                <div style="font-size:0.72rem; padding:6px; border-bottom:1px solid rgba(255,255,255,0.05); background:rgba(248,113,113,0.05); margin-bottom:2px; border-radius:3px;">
-                    <span style="color:var(--dash-accent); font-weight:bold;">${h.matched_name || h.ubo || h.director}</span>
-                    <span style="color:var(--dash-text-muted); font-size:0.65rem; margin-left:5px;">[${h.program || 'N/A'}]</span>
-                    <div style="color:var(--dash-text-muted); font-size:0.65rem; margin-top:2px;">Type: ${h.entity_type || 'Individual'} | Country: ${h.country || 'N/A'}</div>
-                </div>
-            `).join('')}
-        `;
-    }
-
-    if (log.output?.decision_logic || log.output?.rationale || log.ai_summary || log.output?.audit_trail) {
+    if (log.output?.decision_logic || log.output?.rationale || log.ai_summary || log.output?.audit_trail || log.output?.hits?.length > 0) {
         html += `
             <button onclick='showEvidenceModal(${JSON.stringify(log).replace(/'/g, "&apos;")})' 
-                    style="margin-top:10px; background:rgba(0, 255, 163, 0.05); border:1px solid rgba(0, 255, 163, 0.2); color:var(--dash-accent); padding:4px 10px; border-radius:4px; font-size:0.65rem; cursor:pointer; font-weight:bold; transition:all 0.2s; width:100%; text-align:center;">
+                    style="margin-top:4px; background:rgba(0, 255, 163, 0.05); border:1px solid rgba(0, 255, 163, 0.2); color:var(--dash-accent); padding:4px 10px; border-radius:4px; font-size:0.65rem; cursor:pointer; font-weight:bold; transition:all 0.2s; width:100%; text-align:center;">
                 🔎 VIEW DECISION LOG & EVIDENCE
             </button>
         `;
@@ -534,7 +524,7 @@ window.showEvidenceModal = function (log) {
         <div id="evidence-modal-backdrop" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:9999; display:flex; align-items:center; justify-content:center;">
             <div style="background:var(--dash-bg); border:1px solid rgba(0,255,163,0.2); border-radius:12px; width:95%; max-width:800px; padding:30px; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.5); overflow-y:auto; max-height:90vh;">
                 <div style="font-size:1.2rem; font-weight:bold; color:var(--dash-accent); margin-bottom:20px; display:flex; align-items:center; gap:10px;">
-                    <span>🛡</span> AI Audit Intelligence Report
+                    <span>🛡</span> AI Intelligence Report
                 </div>
                 
                 ${auditHtml}
@@ -546,7 +536,7 @@ window.showEvidenceModal = function (log) {
                 
                 <button onclick="document.getElementById('evidence-modal').remove()" 
                         style="margin-top:25px; width:100%; background:var(--dash-accent); border:none; color:black; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; text-transform:uppercase; letter-spacing:1px;">
-                    Close Audit Report
+                    Close
                 </button>
                 <div style="margin-top:10px; font-size:0.7rem; color:var(--dash-text-muted); text-align:center;">
                     This comprehensive audit trail is generated in real-time by Amazon Bedrock agents.
@@ -562,7 +552,7 @@ async function fetchAgentLogs(ticketId) {
     try {
         const res = await fetch(`${API_BASE}/admin/tickets/${ticketId}/agent-logs`);
         const data = await res.json();
-        const logs = data.logs || [];
+        const logs = (data.logs || []).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         if (!logs.length) {
             container.innerHTML = '<div style="color:var(--dash-text-muted);font-style:italic;">No agent logs yet. KYC check will run automatically after signup.</div>';
             return;
@@ -571,7 +561,7 @@ async function fetchAgentLogs(ticketId) {
         // Group by stage
         const byStage = {};
         logs.forEach(log => {
-            const stageKey = log.stage === 1 ? '1 — KYC Screening' : log.stage === 2 ? '2 — AML Risk Profiling' : `${log.stage} — Orchestrator`;
+            const stageKey = log.stage === 1 ? '1 — Document Verification' : log.stage === 2 ? '2 — KYC Screening' : log.stage === 3 ? '3 — AML Risk Profiling' : `${log.stage} — Orchestrator`;
             if (!byStage[stageKey]) byStage[stageKey] = [];
             byStage[stageKey].push(log);
         });
@@ -588,7 +578,7 @@ async function fetchAgentLogs(ticketId) {
                     <div style="flex:1;">
                         ${agentRiskBadge(log.risk_level)}
                         <span style="margin-left:8px;font-size:0.75rem;color:var(--dash-text-muted);">${log.recommendation || ''}</span>
-                        <div style="margin-top:4px;color:var(--dash-text-muted);font-size:0.78rem;">${log.ai_summary || ''}</div>
+                        <!-- Detailed summary hidden in main list -->
                         ${renderAgentEvidence(log)}
                         ${flags}
                     </div>

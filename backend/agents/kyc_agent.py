@@ -14,14 +14,19 @@ _PUBLIC_DOMAINS = {
     "icloud.com", "protonmail.com", "aol.com", "live.com", "mail.com"
 }
 
-# Sanctions fuzzy match threshold (simple ILIKE for local; Bedrock KB for AWS)
-_SANCTIONS_THRESHOLD = 0.80  # 80% similarity
+# Generic corporate tokens to ignore in sanctions fuzzy match to prevent false positives
+_COMMON_TOKENS = {
+    "group", "financial", "services", "corporation", "corp", "limited", "ltd", 
+    "inc", "incorporated", "company", "holdings", "management", "international",
+    "global", "solutions", "partners", "capital", "trust", "investment"
+}
 
 
 def _ilike_match(cursor, name: str) -> list:
     """Simple ILIKE partial match against sanctions_list. Returns list of hits."""
     # Split name into tokens and check any token against entity_name
-    tokens = [t for t in name.split() if len(t) > 3]
+    # Filter out common tokens and short words to reduce false positives
+    tokens = [t.lower() for t in name.split() if len(t) > 3 and t.lower() not in _COMMON_TOKENS]
     hits = []
     for token in tokens:
         cursor.execute("""
@@ -192,23 +197,52 @@ def lei_verify(lei: str, company_name: str, run_id: str, onboarding_id: str, **k
     lei_row = None
     try:
         with conn.cursor() as cursor:
-            cursor.execute("""
-                SELECT lei_code, legal_name, status, country, ein_number, dba_name
-                FROM client_onboarding.entity_verification
-                WHERE lei_code = %s
-            """, (lei,))
-            row = cursor.fetchone()
-            if row:
-                lei_valid = True
-                lei_row = {
-                    "lei_code": row[0], "legal_name": row[1], "status": row[2], 
-                    "country": row[3], "ein_number": row[4], "dba_name": row[5]
-                }
-                # Simple name match — first word of each
-                name_match = (
-                    company_name.split()[0].lower() in row[1].lower() or
-                    row[1].split()[0].lower() in company_name.lower()
-                ) if company_name else False
+            # First try LEI
+            if lei:
+                cursor.execute("""
+                    SELECT lei_number, company_name, verification_status, country, ein_number, dba_name
+                    FROM client_onboarding.entity_verification
+                    WHERE lei_number = %s
+                """, (lei,))
+                row = cursor.fetchone()
+                if row:
+                    lei_valid = True
+                    lei_row = {
+                        "lei_number": row[0], "company_name": row[1], "status": row[2], 
+                        "country": row[3], "ein_number": row[4], "dba_name": row[5]
+                    }
+            
+            # If no LEI match, fallback to Company Name fuzzy match
+            if not lei_valid and company_name:
+                cursor.execute("""
+                    SELECT lei_number, company_name, verification_status, country, ein_number, dba_name
+                    FROM client_onboarding.entity_verification
+                    WHERE company_name ILIKE %s
+                    LIMIT 1
+                """, (f"%{company_name.split()[0]}%",))
+                row = cursor.fetchone()
+                if row:
+                    lei_row = {
+                        "lei_number": row[0], "company_name": row[1], "status": row[2], 
+                        "country": row[3], "ein_number": row[4], "dba_name": row[5]
+                    }
+                    # We found a record by name even if LEI was missing/wrong
+                    name_match = True 
+
+            # Cross-verify name if LEI was found (OUTSIDE the fallback loop)
+            if lei_valid and not name_match and company_name and lei_row:
+                # Get unique tokens (ignoring common ones like Group, Financial)
+                form_tokens = {t.lower() for t in company_name.split() if t.lower() not in _COMMON_TOKENS and len(t) > 2}
+                reg_name_lower = lei_row['company_name'].lower()
+                
+                # If any unique word from the form is in the registry name, it's a match
+                if any(token in reg_name_lower for token in form_tokens):
+                    name_match = True
+                else:
+                    # Final fallback: check if first word of registry is in form name
+                    first_reg_word = lei_row['company_name'].split()[0].lower()
+                    if first_reg_word in company_name.lower():
+                        name_match = True
     except Exception as e:
         print(f"[KYCAgent] lei_verify error: {e}")
     finally:
@@ -241,14 +275,16 @@ def lei_verify(lei: str, company_name: str, run_id: str, onboarding_id: str, **k
         recommendation = "FLAG"
     elif not name_match:
         risk_level = "MEDIUM"
-        flags = [f"Name mismatch: form='{company_name}' vs LEI record='{lei_row['legal_name']}'"]
-        summary = f"LEI valid but company name does not match LEI record ('{lei_row['legal_name']}')."
+        flags = [f"Name mismatch: form='{company_name}' vs LEI record='{lei_row['company_name']}'"]
+        summary = f"LEI valid but company name mismatch: Form='{company_name}' vs Registry='{lei_row['company_name']}'."
         recommendation = "FLAG"
     elif not ein_match:
-        risk_level = "MEDIUM"
-        flags = [f"EIN mismatch: form='{kwargs.get('ein_number')}' vs registry='{lei_row['ein_number']}'"]
-        summary = f"LEI verify: EIN mismatch against official registration record."
-        recommendation = "FLAG"
+        risk_level = "HIGH"
+        reg_ein = lei_row.get("ein_number", "None")
+        sub_ein = kwargs.get("ein_number", "None")
+        flags = [f"EIN mismatch: form='{sub_ein}' vs registry='{reg_ein}'"]
+        summary = f"CRITICAL: EIN Mismatch. Form EIN '{sub_ein}' does not match official Registry EIN '{reg_ein}'."
+        recommendation = "REJECT"
     elif not dba_match:
         risk_level = "LOW"
         flags = [f"DBA mismatch: form='{kwargs.get('dba_name')}' vs registry='{lei_row['dba_name']}'"]
@@ -257,7 +293,7 @@ def lei_verify(lei: str, company_name: str, run_id: str, onboarding_id: str, **k
     else:
         risk_level = "LOW"
         flags = []
-        summary = f"LEI {lei} verified. Matches '{lei_row['legal_name']}' and tax records."
+        summary = f"LEI {lei} verified. Matches '{lei_row['company_name']}' and tax records."
         recommendation = "PASS"
 
     result = {
@@ -266,7 +302,14 @@ def lei_verify(lei: str, company_name: str, run_id: str, onboarding_id: str, **k
         "recommendation": recommendation,
         "flags": flags,
         "ai_summary": summary,
-        "output": {"lei_valid": lei_valid, "name_match": name_match, "lei_row": lei_row}
+        "output": {
+            "submitted_lei": lei,
+            "submitted_ein": kwargs.get("ein_number"),
+            "registry_record": lei_row,
+            "lei_valid": lei_valid,
+            "name_match": name_match,
+            "ein_match": ein_match
+        }
     }
     insert_agent_log({
         "run_id": run_id, "onboarding_id": onboarding_id,
@@ -330,19 +373,44 @@ def pep_check(pep_declaration: bool, ubos: list, run_id: str, onboarding_id: str
     return result
 
 
-def email_domain_check(email: str, run_id: str, onboarding_id: str) -> dict:
-    """Block public/personal email domains — institutional emails required."""
+def email_domain_check(email: str, run_id: str, onboarding_id: str, website: str = None, directors: list = None) -> dict:
+    """Institutional email validation with domain-to-website cross-check."""
     start = time.time()
     domain = email.split("@")[-1].lower() if "@" in email else ""
     is_public = domain in _PUBLIC_DOMAINS
-    flags = [f"Public email domain detected: @{domain}"] if is_public else []
-    risk_level = "HIGH" if is_public else "LOW"
-    summary = (
-        f"Non-institutional email domain '@{domain}' used. Institutional email required."
-        if is_public else
-        f"Email domain '@{domain}' is institutional. No concern."
-    )
-    recommendation = "FLAG" if is_public else "PASS"
+    
+    # 1. Match against company website domain (if provided)
+    web_domain = website.lower().replace("https://","").replace("http://","").replace("www.","").split("/")[0] if website else ""
+    web_match = domain == web_domain if web_domain and domain else False
+    
+    # 2. Match against director names (high risk if domain is a relative's name)
+    director_match = False
+    if directors:
+        for d in directors:
+            d_name = d.get('full_name', '').lower().replace(" ","")
+            if d_name and d_name in domain:
+                director_match = True
+                break
+
+    flags = []
+    if is_public:
+        flags.append(f"Public email domain detected: @{domain}")
+    elif website and not web_match:
+        flags.append(f"Domain mismatch: email '@{domain}' vs website '{web_domain}'")
+    
+    if director_match and is_public:
+        flags.append(f"Personal email belongs to director match")
+
+    risk_level = "HIGH" if is_public else ("MEDIUM" if (website and not web_match) else "LOW")
+    
+    if is_public:
+        summary = f"Personal email '@{domain}' used. Institutional '@{web_domain or 'company.com'}' required."
+    elif website and not web_match:
+        summary = f"Email '@{domain}' does not match official company domain '{web_domain}'."
+    else:
+        summary = f"Institutional email '@{domain}' verified against company identity."
+
+    recommendation = "FLAG" if (is_public or (website and not web_match)) else "PASS"
     duration_ms = int((time.time() - start) * 1000)
 
     result = {
@@ -351,7 +419,7 @@ def email_domain_check(email: str, run_id: str, onboarding_id: str) -> dict:
         "recommendation": recommendation,
         "flags": flags,
         "ai_summary": summary,
-        "output": {"email": email, "domain": domain, "is_public": is_public}
+        "output": {"email": email, "domain": domain, "web_domain": web_domain, "is_public": is_public, "web_match": web_match}
     }
     insert_agent_log({
         "run_id": run_id, "onboarding_id": onboarding_id,

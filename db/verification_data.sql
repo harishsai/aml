@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS client_onboarding.entity_verification (
 
 -- Mock Data (100 Records)
 INSERT INTO client_onboarding.entity_verification (lei_number, company_name, entity_type, registered_address, country, ein_number, dba_name) VALUES
-('5493001KJY7UW9K12345', 'Evergreen Financial Group', 'Bank', '120 Wall Street, New York, NY 10005', 'United States', '12-3456789', 'Evergreen Private Wealth'),
+('5493001KJY7UW9K12345', 'Evergreen Financial Group', 'Bank', '120 Wall Street, New York, NY 10005', 'United States', 'NY-889900-TAX', 'Evergreen Private Wealth'),
 ('5493002KJY7UW9K67890', 'North Star Asset Management', 'Fund', '10 Collyer Quay, Ocean Financial Centre', 'Singapore', 'SG-99-887766', 'North Star Funds'),
 ('5493003KJY7UW9K11111', 'Riverbank Global Trade', 'Corporate', 'Canary Wharf, London E14 5AB', 'United Kingdom', 'UK-77-665544', 'Riverbank FX'),
 ('5493004KJY7UW9K22222', 'Indus Valley Ventures', 'Broker-Dealer', 'Bandra Kurla Complex, Mumbai, MH 400051', 'India', 'AAACI-1234-A', 'Indus Valley Investments'),

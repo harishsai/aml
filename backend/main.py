@@ -27,7 +27,7 @@ from .email_utils import (
     send_aml_stage_complete_email,
     send_kyc_rejected_email
 )
-from .agents.orchestrator import run_kyc_stage, run_aml_risk_stage
+from .agents.orchestrator import run_document_agent_stage, run_kyc_stage, run_aml_risk_stage
 
 class ActionRequest(BaseModel):
     action: str
@@ -256,9 +256,9 @@ async def signup(
     logger.info(f"Signup successful for {email}. Tracking ID: {tracking_id}. Triggering background tasks.")
     background_tasks.add_task(send_confirmation_email, email, fname, tracking_id, temp_password)
 
-    # Trigger KYC Agent automatically after signup
+    # Trigger Document Agent automatically after signup (Stage 1)
     onboarding_id_str = str(result)
-    background_tasks.add_task(_run_kyc_and_notify, onboarding_id_str, email, tracking_id)
+    background_tasks.add_task(_run_doc_agent_and_notify, onboarding_id_str, email, tracking_id)
 
     return {
         "status": "success",
@@ -266,6 +266,14 @@ async def signup(
         "onboarding_id": onboarding_id_str,
         "tracking_id": tracking_id
     }
+
+
+def _run_doc_agent_and_notify(onboarding_id: str, email: str, tracking_id: str):
+    """Background task: run Document Verification stage."""
+    try:
+        run_document_agent_stage(onboarding_id)
+    except Exception as e:
+        logger.error(f"Document background task failed for {onboarding_id}: {e}", exc_info=True)
 
 
 def _run_kyc_and_notify(onboarding_id: str, email: str, tracking_id: str):
@@ -400,6 +408,20 @@ async def ticket_action(ticket_id: str, req: ActionRequest, request: Request, ba
     tracking_id = ticket.get("tracking_id", "")
 
     # --- Stage-aware routing ---
+    if action == "approve" and current_status == "DOCUMENT_COMPLETE":
+        # Document check approved by admin → trigger KYC Screening
+        success, message = update_onboarding_status(
+            ticket_id, "KYC_IN_PROGRESS",
+            action_by="ADMIN",
+            ip=request.client.host,
+            workstation=request.headers.get("user-agent", "Unknown"),
+            remarks=req.remarks or "Documents verified. KYC Screening initiated."
+        )
+        if not success:
+            raise HTTPException(status_code=500, detail=message)
+        background_tasks.add_task(_run_kyc_and_notify, ticket_id, email, tracking_id)
+        return {"status": "success", "message": "Documents approved. KYC Agent started."}
+
     if action == "approve" and current_status == "KYC_COMPLETE":
         # KYC approved by admin → trigger AML Risk stage
         success, message = update_onboarding_status(

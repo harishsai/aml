@@ -1,2 +1,12 @@
 .dbenv
 cfg.txt
+setup.txt
+*.log
+__pycache__/
+*.zip
+.agent/
+.gemini/
+.DS_Store
+node_modules/
+dist/
+build/

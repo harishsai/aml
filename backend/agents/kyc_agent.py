@@ -6,6 +6,8 @@ When AWS Bedrock is integrated, this module becomes a Lambda Action Group.
 """
 
 import time
+import json
+import urllib.request
 from ..db import get_connection, release_connection, insert_agent_log
 
 # Public/free email domain blocklist
@@ -47,24 +49,35 @@ def _ilike_match(cursor, name: str) -> list:
 
 
 def sanctions_check(company_name: str, run_id: str, onboarding_id: str) -> dict:
-    """Check company name against OFAC SDN sanctions list."""
+    """Check company name against US ICE Wanted API."""
     start = time.time()
-    conn = get_connection()
     hits = []
     try:
-        with conn.cursor() as cursor:
-            hits = _ilike_match(cursor, company_name)
+        url = "https://data.opensanctions.org/artifacts/us_ice_wanted/20250714143724-bvk/entities.delta.json"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response:
+            print(f"Response {response}")
+            for line in response:
+                if not line.strip():
+                    continue
+                obj = json.loads(line)
+                entity = obj.get("entity", {})
+                caption = entity.get("caption", "")
+                print(f"caption {caption} : company_name {company_name}")
+                # Compare caption with company name
+                if caption and (company_name.lower() in caption.lower() or caption.lower() in company_name.lower()):
+                    hits.append({
+                        "matched_name": caption,
+                        "program": "US_ICE_WANTED"
+                    })
     except Exception as e:
         print(f"[KYCAgent] sanctions_check error: {e}")
-    finally:
-        if conn:
-            release_connection(conn)
 
     duration_ms = int((time.time() - start) * 1000)
     risk_level = "CRITICAL" if hits else "LOW"
     flags = [f"{h['matched_name']} → {h['program']}" for h in hits]
     summary = (
-        f"Direct SDN match found: {', '.join(flags)}" if hits
+        f"API SDN match found: {', '.join(flags)}" if hits
         else f"No sanctions match for '{company_name}'."
     )
     result = {
@@ -87,6 +100,8 @@ def sanctions_check(company_name: str, run_id: str, onboarding_id: str) -> dict:
         "model_used": "rule-based",
         "duration_ms": duration_ms
     })
+    print(f"result {result}")
+
     return result
 
 
